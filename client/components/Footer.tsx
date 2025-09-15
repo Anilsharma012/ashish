@@ -371,11 +371,15 @@ export default function Footer() {
             } catch (fetchError: any) {
               clearTimeout(timeoutId);
 
-              if (controller.signal.aborted || fetchError?.name === "AbortError") {
+              if (
+                controller.signal.aborted ||
+                fetchError?.name === "AbortError"
+              ) {
                 console.warn(`⏱️ ${name} fetch aborted (timeout)`);
               } else if (
                 fetchError?.name === "TypeError" &&
-                (fetchError?.message?.includes("fetch") || fetchError?.message?.includes("Network"))
+                (fetchError?.message?.includes("fetch") ||
+                  fetchError?.message?.includes("Network"))
               ) {
                 console.warn(
                   `🌐 ${name} network error: ${fetchError?.message || "Network unavailable"}`,

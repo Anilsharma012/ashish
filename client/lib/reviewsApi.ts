@@ -42,7 +42,9 @@ export async function fetchApprovedReviews({
       { method: "GET", signal },
     );
     if (!tf.ok) return [];
-    const raw = Array.isArray(tf.data?.data) ? tf.data.data : tf.data?.testimonials || tf.data;
+    const raw = Array.isArray(tf.data?.data)
+      ? tf.data.data
+      : tf.data?.testimonials || tf.data;
     const arr = Array.isArray(raw) ? raw : [];
     return arr.map((t: any) => ({
       id: t._id || t.id,
@@ -114,23 +116,33 @@ export async function adminListPending({
 }): Promise<any[]> {
   try {
     // Primary API (reviews)
-    const res = await apiRequest(`admin/reviews?status=pending&limit=${limit}`, {
-      method: "GET",
-      headers: headers(),
-      signal,
-    });
+    const res = await apiRequest(
+      `admin/reviews?status=pending&limit=${limit}`,
+      {
+        method: "GET",
+        headers: headers(),
+        signal,
+      },
+    );
     if (res.ok) {
       const data = Array.isArray(res.data) ? res.data : res.data?.data;
       return Array.isArray(data) ? data : [];
     }
     // Fallback to testimonials
-    const tf = await apiRequest(`admin/testimonials?status=pending&limit=${limit}`, {
-      method: "GET",
-      headers: headers(),
-      signal,
-    });
+    const tf = await apiRequest(
+      `admin/testimonials?status=pending&limit=${limit}`,
+      {
+        method: "GET",
+        headers: headers(),
+        signal,
+      },
+    );
     if (!tf.ok) return [];
-    const raw = tf.data?.data?.testimonials || tf.data?.testimonials || tf.data?.data || tf.data;
+    const raw =
+      tf.data?.data?.testimonials ||
+      tf.data?.testimonials ||
+      tf.data?.data ||
+      tf.data;
     const arr = Array.isArray(raw) ? raw : [];
     return arr.map((t: any) => ({
       id: t._id || t.id,

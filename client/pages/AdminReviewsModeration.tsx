@@ -61,17 +61,40 @@ export default function AdminReviewsModeration() {
       ) : (
         <div className="grid gap-3">
           {items.map((r) => (
-            <div key={r.id} className="rounded-xl shadow-sm border p-4 bg-white">
+            <div
+              key={r.id}
+              className="rounded-xl shadow-sm border p-4 bg-white"
+            >
               <div className="flex justify-between mb-1">
                 <div className="font-medium">{r.userName || "User"}</div>
-                <div className="text-amber-400">{"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 0)))}</div>
+                <div className="text-amber-400">
+                  {"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 0)))}
+                </div>
               </div>
-              {r.title && <div className="text-sm font-semibold mb-1">{r.title}</div>}
-              <div className="text-sm text-gray-700 whitespace-pre-line mb-2">{r.comment}</div>
-              <div className="text-xs text-gray-400 mb-3">Target: {r.targetType} • {r.targetId}</div>
+              {r.title && (
+                <div className="text-sm font-semibold mb-1">{r.title}</div>
+              )}
+              <div className="text-sm text-gray-700 whitespace-pre-line mb-2">
+                {r.comment}
+              </div>
+              <div className="text-xs text-gray-400 mb-3">
+                Target: {r.targetType} • {r.targetId}
+              </div>
               <div className="flex gap-2">
-                <button aria-label="Approve" onClick={() => act(r.id, "approved")} className="px-3 py-1 rounded-md bg-green-600 text-white text-sm">Approve</button>
-                <button aria-label="Reject" onClick={() => act(r.id, "rejected")} className="px-3 py-1 rounded-md bg-red-600 text-white text-sm">Reject</button>
+                <button
+                  aria-label="Approve"
+                  onClick={() => act(r.id, "approved")}
+                  className="px-3 py-1 rounded-md bg-green-600 text-white text-sm"
+                >
+                  Approve
+                </button>
+                <button
+                  aria-label="Reject"
+                  onClick={() => act(r.id, "rejected")}
+                  className="px-3 py-1 rounded-md bg-red-600 text-white text-sm"
+                >
+                  Reject
+                </button>
               </div>
             </div>
           ))}

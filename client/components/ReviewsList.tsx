@@ -34,8 +34,17 @@ export default function ReviewsList({
     try {
       abortRef.current?.abort();
       abortRef.current = new AbortController();
-      const data = await fetchApprovedReviews({ targetId, targetType, limit, signal: abortRef.current.signal });
-      setItems(Array.isArray(data) ? data.filter((r: any) => r.status === "approved") : []);
+      const data = await fetchApprovedReviews({
+        targetId,
+        targetType,
+        limit,
+        signal: abortRef.current.signal,
+      });
+      setItems(
+        Array.isArray(data)
+          ? data.filter((r: any) => r.status === "approved")
+          : [],
+      );
     } catch {
       // silent
     } finally {
@@ -76,15 +85,30 @@ export default function ReviewsList({
       ) : (
         <div className="space-y-3">
           {items.map((r) => (
-            <div key={r.id} className="rounded-xl shadow-sm border p-4 bg-white">
+            <div
+              key={r.id}
+              className="rounded-xl shadow-sm border p-4 bg-white"
+            >
               <div className="flex items-center justify-between mb-1">
-                <div className="font-medium text-sm">{r.userName || "User"}</div>
-                <div className="text-amber-400 text-sm">{"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 0)))}</div>
+                <div className="font-medium text-sm">
+                  {r.userName || "User"}
+                </div>
+                <div className="text-amber-400 text-sm">
+                  {"★".repeat(Math.max(1, Math.min(5, Number(r.rating) || 0)))}
+                </div>
               </div>
-              {r.title && <div className="text-sm font-semibold mb-1">{r.title}</div>}
-              <p className="text-sm text-gray-700 whitespace-pre-line">{r.comment}</p>
+              {r.title && (
+                <div className="text-sm font-semibold mb-1">{r.title}</div>
+              )}
+              <p className="text-sm text-gray-700 whitespace-pre-line">
+                {r.comment}
+              </p>
               <div className="text-xs text-gray-400 mt-2">
-                {r.createdAt ? formatDistanceToNow(new Date(r.createdAt), { addSuffix: true }) : ""}
+                {r.createdAt
+                  ? formatDistanceToNow(new Date(r.createdAt), {
+                      addSuffix: true,
+                    })
+                  : ""}
               </div>
             </div>
           ))}

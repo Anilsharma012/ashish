@@ -194,7 +194,10 @@ function App() {
                   <Route path="/seller/blog" element={<SellerBlog />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/support" element={<Admin />} />
-                  <Route path="/admin/reviews" element={<AdminReviewsModeration />} />
+                  <Route
+                    path="/admin/reviews"
+                    element={<AdminReviewsModeration />}
+                  />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route
                     path="/admin/ads/categories"
@@ -226,7 +229,10 @@ function App() {
                   {/* Content Pages */}
                   <Route path="/about-us" element={<About />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-conditions" element={<TermsAndConditions />} />
+                  <Route
+                    path="/terms-conditions"
+                    element={<TermsAndConditions />}
+                  />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
                   {/* Footer Test Page */}
