@@ -42,7 +42,8 @@ export default function ReviewForm({ targetId, targetType = "property" }: { targ
         setComment("");
         setPendingNote("Your review is pending approval.");
       } else {
-        toast({ title: "Submission failed", description: "Please try again later." });
+        const msg = res.status === "401" || res.status === "403" ? "Please login to submit a review." : "Please try again later.";
+        toast({ title: "Submission failed", description: msg });
       }
     } finally {
       setSubmitting(false);
