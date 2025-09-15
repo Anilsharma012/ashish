@@ -21,7 +21,7 @@ interface PublicSettings {
 
 export default function PrivacyPolicy() {
   const [settings, setSettings] = useState<PublicSettings["data"] | null>(null);
-  const [effectiveDate, setEffectiveDate] = useState<string>(new Date().toLocaleDateString());
+  const [effectiveDate, setEffectiveDate] = useState<string>("15 September 2025");
 
   useEffect(() => {
     const load = async () => {
@@ -45,8 +45,8 @@ export default function PrivacyPolicy() {
 
   // SEO
   useEffect(() => {
-    const title = `Privacy Policy | ${siteName}`;
-    const desc = `Read the Privacy Policy for ${siteName}. Learn how we collect, use, and protect your data.`;
+    const title = "Privacy Policy | Ashish Property";
+    const desc = "How Ashish Property collects, uses, and safeguards your data. Read our privacy practices and your rights.";
     document.title = title;
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
@@ -55,7 +55,7 @@ export default function PrivacyPolicy() {
       document.head.appendChild(meta);
     }
     meta.setAttribute("content", desc);
-  }, [siteName]);
+  }, []);
 
   const toc = useMemo(
     () => [
@@ -102,102 +102,80 @@ export default function PrivacyPolicy() {
         <article className="space-y-10">
           <section id="introduction" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">1) Introduction</h2>
-            <p className="text-gray-700">
-              We respect your privacy. This Privacy Policy explains how {siteName} collects, uses, and protects personal information in connection with our website, app, and services in India.
-            </p>
+            <p className="text-gray-700">This Privacy Policy explains how Ashish Property (“we”, “us”, “our”) collects, uses, and protects information when you use our website, services, and communication channels in India.</p>
           </section>
 
           <section id="data-we-collect" className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">2) Data We Collect</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">2) Information We Collect</h2>
             <ul className="list-disc pl-6 text-gray-700 space-y-1">
-              <li>Provided: name, phone, email, address, service or property details.</li>
-              <li>Automatic: device information, cookies, analytics data, and usage logs.</li>
+              <li><strong>Provided by you:</strong> Name, phone, email, requirements, location preferences, budget, and property details.</li>
+              <li><strong>Automatic:</strong> Device info, cookies, and basic analytics for improving experience.</li>
+              <li><strong>From third parties:</strong> Lead portals, banking partners (with consent), and public records for verification.</li>
             </ul>
           </section>
 
           <section id="use-of-data" className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">3) Use of Data</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">3) How We Use Information</h2>
             <ul className="list-disc pl-6 text-gray-700 space-y-1">
-              <li>Provide and improve services, including scheduling and customer support.</li>
-              <li>Safety, fraud prevention, and quality assurance.</li>
-              <li>Communication (SMS/WhatsApp/email) about orders, quotes, and updates.</li>
+              <li>To provide and improve services, share curated listings, schedule site visits, and close transactions.</li>
+              <li>To communicate updates, offers, and service notifications via call/SMS/WhatsApp/email.</li>
+              <li>For fraud prevention, legal compliance, and analytics.</li>
             </ul>
           </section>
 
           <section id="legal-basis" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">4) Legal Basis / Consent</h2>
-            <ul className="list-disc pl-6 text-gray-700 space-y-1">
-              <li>Consent</li>
-              <li>Contract performance</li>
-              <li>Legitimate interests</li>
-              <li>Legal compliance</li>
-            </ul>
+            <p className="text-gray-700">We process data based on your consent, to perform a contract (service request), our legitimate interests, and compliance with applicable laws.</p>
           </section>
 
           <section id="sharing" className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">5) Sharing</h2>
-            <p className="text-gray-700">
-              We may share data with service professionals (for job fulfillment), payment processors, analytics providers, and to comply with the law. We do not sell personal data.
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">5) Sharing of Information</h2>
+            <p className="text-gray-700">With property owners, buyers/tenants, service partners, banks, and legal/documentation teams for fulfilling your request. With analytics and hosting providers to operate our website. We do not sell your personal data.</p>
           </section>
 
           <section id="retention" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">6) Retention</h2>
-            <p className="text-gray-700">
-              We retain data as required for operations, tax, and legal purposes, and delete or anonymize it thereafter.
-            </p>
+            <p className="text-gray-700">We keep data as long as necessary for services, legal, and tax compliance, then delete/ anonymize it.</p>
           </section>
 
           <section id="your-rights" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">7) Your Rights</h2>
-            <p className="text-gray-700">
-              You may request access, correction, deletion, and withdrawal of consent, and raise a grievance using the contact details below.
-            </p>
+            <p className="text-gray-700">Access, correction, deletion, and withdrawal of consent (subject to legal limits). To exercise rights, contact our Grievance Officer.</p>
           </section>
 
           <section id="children" className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">8) Children</h2>
-            <p className="text-gray-700">
-              Our services are not intended for individuals under 18 without guardian consent.
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">8) Children’s Privacy</h2>
+            <p className="text-gray-700">Services are intended for individuals 18+ or under guardian supervision.</p>
           </section>
 
           <section id="security" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">9) Security</h2>
-            <p className="text-gray-700">
-              We implement reasonable safeguards to protect information. However, no method of transmission or storage is 100% secure.
-            </p>
+            <p className="text-gray-700">We use reasonable safeguards but no method is 100% secure. Share sensitive data with caution.</p>
           </section>
 
           <section id="cookies" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">10) Cookies</h2>
-            <p className="text-gray-700">
-              We use cookies for basic functionality and analytics. You can control cookies through your browser settings.
-            </p>
+            <p className="text-gray-700">We use essential and analytics cookies. You can manage cookies in your browser settings.</p>
           </section>
 
           <section id="third-party-links" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">11) Third-Party Links</h2>
-            <p className="text-gray-700">
-              Our website may contain links to external sites that have their own privacy policies.
-            </p>
+            <p className="text-gray-700">External sites have their own policies; we’re not responsible for their practices.</p>
           </section>
 
           <section id="contact" className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-2">12) Contact / Grievance Officer</h2>
             <div className="text-gray-700 space-y-1">
-              <p><strong>Name:</strong> Grievance Officer</p>
-              <p><strong>Email:</strong> {email}</p>
-              <p><strong>Address:</strong> {address}</p>
-              <p><strong>Phone:</strong> {phone}</p>
+              <p><strong>Name:</strong> 📌 Officer Name</p>
+              <p><strong>Email:</strong> privacy@ashishproperty.in</p>
+              <p><strong>Phone:</strong> +91-XXXXXXXXXX</p>
+              <p><strong>Address:</strong> 📌 Full postal address</p>
             </div>
           </section>
 
           <section id="changes" className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">13) Changes</h2>
-            <p className="text-gray-700">
-              We may update this Privacy Policy from time to time. The new effective date will be reflected at the top of this page.
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">13) Changes to Policy</h2>
+            <p className="text-gray-700">We may update this Policy; the “Last Updated” date will change accordingly. Note: This is general information, not legal advice. For strict compliance (e.g., DPDP Act 2023), consult your legal advisor.</p>
           </section>
         </article>
       </main>

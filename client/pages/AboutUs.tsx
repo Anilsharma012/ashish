@@ -66,8 +66,8 @@ export default function AboutUs() {
 
   // SEO
   useEffect(() => {
-    const title = `About ${siteName}`;
-    const desc = `About ${siteName} in ${city}, ${state}. We help buyers, sellers, renters, and businesses with trusted property solutions and related services in ${city}.`;
+    const title = "About Ashish Property | Real Estate in Rohtak";
+    const desc = "Learn about Ashish Property—Rohtak’s trusted real-estate partner for buying, selling, and renting residential & commercial properties. Transparent deals, verified listings, and end-to-end support.";
     document.title = title;
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
@@ -76,19 +76,15 @@ export default function AboutUs() {
       document.head.appendChild(meta);
     }
     meta.setAttribute("content", desc);
-  }, [siteName, city, state]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
       <header className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-            About {siteName}
-          </h1>
-          <p className="mt-3 text-lg text-gray-600">
-            We help buyers, sellers, renters, and businesses with property needs and reliable home services in {city}.
-          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">About Ashish Property</h1>
+          <p className="mt-3 text-lg text-gray-600">Ashish Property is a hyperlocal real-estate partner helping families and businesses in Rohtak and nearby areas discover the right homes, plots, and commercial spaces—quickly and transparently. Our mission is simple: trust, clarity, and speed in every real-estate transaction.</p>
         </div>
       </header>
 
@@ -96,30 +92,35 @@ export default function AboutUs() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">What we do</h2>
             <div className="space-y-4 text-gray-700 leading-relaxed">
-              <p>
-                {siteName} brings reliable property solutions and on-demand home services to homes and businesses across {city}. We focus on transparent pricing, punctual visits, and lasting fixes.
-              </p>
-              <p>
-                Simple booking, upfront quotes, tracked jobs, and feedback-driven quality control keep your experience smooth and predictable.
-              </p>
-              <p>
-                Background-verified professionals, standard checklists, and secure payments ensure trust and safety for every job.
-              </p>
+              <p><strong>Buy & Sell:</strong> Verified residential homes, floors, plots, builder floors, and commercial units.</p>
+              <p><strong>Rent & Lease:</strong> Curated houses, flats, shops, offices, and godowns with clear terms.</p>
+              <p><strong>Land & Development:</strong> Residential plots, industrial land, farmhouses and collaboration projects.</p>
+              <p><strong>Advisory & Documentation:</strong> Pricing guidance, due-diligence, registry assistance, and bank loan support.</p>
             </div>
 
-            <ul className="mt-6 grid sm:grid-cols-3 gap-3">
-              <li className="flex items-center text-gray-800">
-                <Zap className="h-5 w-5 text-[#C70000] mr-2" /> Fast service
-              </li>
-              <li className="flex items-center text-gray-800">
-                <ShieldCheck className="h-5 w-5 text-[#C70000] mr-2" /> Verified experts
-              </li>
-              <li className="flex items-center text-gray-800">
-                <Award className="h-5 w-5 text-[#C70000] mr-2" /> Fair pricing
-              </li>
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Why Ashish Property</h2>
+            <ul className="list-disc pl-6 space-y-2 text-gray-700">
+              <li><strong>Local Expertise:</strong> Deep knowledge of Rohtak sectors, colonies, and emerging pockets.</li>
+              <li><strong>Verified Listings:</strong> Physical checks, owner validation, and requirement fitment.</li>
+              <li><strong>Transparent Pricing:</strong> Comparable sales data and clear cost breakdowns.</li>
+              <li><strong>End-to-End Support:</strong> From site visits to paperwork and possession.</li>
             </ul>
+
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">How it works</h2>
+            <ol className="list-decimal pl-6 space-y-2 text-gray-700">
+              <li>Share your requirement (budget, location, size).</li>
+              <li>Get curated options with photos, videos, and pricing.</li>
+              <li>Site visit & shortlist with honest guidance.</li>
+              <li>Close confidently with documentation and loan assistance.</li>
+            </ol>
+
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-2">Service Areas</h2>
+            <p className="text-gray-700">Rohtak city & outskirts (📌 add specific sectors/colonies here), with selective coverage across Sonipat | Jhajjar | Panipat (as per requirement).</p>
+
+            <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-2">Contact</h2>
+            <p className="text-gray-700">Call/WhatsApp: 📞 +91-XXXXXXXXXX • Email: info@ashishproperty.in • Office: 📌 Full address here</p>
           </div>
 
           {/* Numbers strip */}
@@ -175,7 +176,7 @@ export default function AboutUs() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-white flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold">Need help now?</h2>
-            <p className="opacity-90">Talk to our team in {city}. We are here to help.</p>
+            <p className="opacity-90">Talk to our team in Rohtak. We are here to help.</p>
           </div>
           <div className="flex gap-3">
             <a

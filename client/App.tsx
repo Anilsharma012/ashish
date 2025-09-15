@@ -53,6 +53,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import ContentPage from "./pages/ContentPage";
 import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 import DynamicPage from "./pages/DynamicPage";
 import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -223,7 +224,7 @@ function App() {
                   {/* Content Pages */}
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-conditions" element={<ContentPage />} />
+                  <Route path="/terms-conditions" element={<TermsConditions />} />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
                   {/* Footer Test Page */}
@@ -231,6 +232,9 @@ function App() {
                   <Route path="/footer-debug" element={<FooterDebugPage />} />
                   {/* Dynamic Pages from Admin */}
                   <Route path="/page/:slug" element={<DynamicPage />} />
+                  <Route path="/p/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/p/about-us" element={<AboutUs />} />
+                  <Route path="/p/terms-conditions" element={<TermsConditions />} />
                   <Route path="/p/:slug" element={<ContentPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
