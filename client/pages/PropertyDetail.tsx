@@ -468,7 +468,7 @@ export default function PropertyDetail() {
                     )}
                   </div>
                   {property.images.length > 1 && (
-                    <div className="flex gap-2 p-4 overflow-x-auto">
+                    <div className="flex gap-2 p-4 overflow-x-auto property-gallery">
                       {property.images.map((image, index) => (
                         <img
                           key={index}
