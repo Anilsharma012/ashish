@@ -52,9 +52,13 @@ import PropertyTypes from "./pages/PropertyTypes";
 import PropertyDetail from "./pages/PropertyDetail";
 import ContentPage from "./pages/ContentPage";
 import DynamicPage from "./pages/DynamicPage";
+import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
 import StaffAdmin from "./pages/StaffAdmin";
+import AdminReviewsModeration from "./pages/AdminReviewsModeration";
 import EnhancedSellerDashboard from "./pages/EnhancedSellerDashboard";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
@@ -190,6 +194,10 @@ function App() {
                   <Route path="/seller/blog" element={<SellerBlog />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/support" element={<Admin />} />
+                  <Route
+                    path="/admin/reviews"
+                    element={<AdminReviewsModeration />}
+                  />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route
                     path="/admin/ads/categories"
@@ -219,9 +227,12 @@ function App() {
                   <Route path="/leads" element={<Leads />} />
                   <Route path="/notifications" element={<Notifications />} />
                   {/* Content Pages */}
-                  <Route path="/about-us" element={<ContentPage />} />
-                  <Route path="/privacy-policy" element={<ContentPage />} />
-                  <Route path="/terms-conditions" element={<ContentPage />} />
+                  <Route path="/about-us" element={<About />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route
+                    path="/terms-conditions"
+                    element={<TermsAndConditions />}
+                  />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
                   {/* Footer Test Page */}

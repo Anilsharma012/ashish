@@ -30,6 +30,8 @@ import { toast } from "../components/ui/use-toast";
 import ApiDiagnostic from "../components/ApiDiagnostic";
 import EnquiryModal from "../components/EnquiryModal";
 import PropertyReviews from "../components/PropertyReviews";
+import ReviewsList from "../components/ReviewsList";
+import ReviewForm from "../components/ReviewForm";
 
 interface Property {
   _id: string;
@@ -605,6 +607,11 @@ export default function PropertyDetail() {
                 {/* Reviews */}
                 <div className="mt-6">
                   <PropertyReviews propertyId={property._id} />
+                </div>
+                <div className="mt-6">
+                  {/* Approved reviews list (new system) */}
+                  <ReviewsList targetId={property._id} targetType="property" />
+                  <ReviewForm targetId={property._id} targetType="property" />
                 </div>
               </CardContent>
             </Card>
