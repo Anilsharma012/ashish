@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
+import { useWatermark } from "../hooks/useWatermark";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -74,6 +75,7 @@ interface Property {
 }
 
 export default function PropertyDetail() {
+  useWatermark();
   const { id } = useParams();
   const navigate = useNavigate();
   const [property, setProperty] = useState<Property | null>(null);
@@ -418,7 +420,10 @@ export default function PropertyDetail() {
             {property.images.length > 0 && (
               <Card>
                 <CardContent className="p-0">
-                  <div className="relative aspect-video">
+                  <div
+                    className="relative aspect-video property-hero"
+                    data-role="property-hero"
+                  >
                     <img
                       src={
                         property.coverImageUrl ??
@@ -468,7 +473,7 @@ export default function PropertyDetail() {
                     )}
                   </div>
                   {property.images.length > 1 && (
-                    <div className="flex gap-2 p-4 overflow-x-auto">
+                    <div className="flex gap-2 p-4 overflow-x-auto property-gallery">
                       {property.images.map((image, index) => (
                         <img
                           key={index}
