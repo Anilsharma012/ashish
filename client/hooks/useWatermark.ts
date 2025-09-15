@@ -10,11 +10,8 @@ import { useEffect } from "react";
 export function useWatermark() {
   useEffect(() => {
     const TEXT = "ASHISH PROPERTY";
-    const ANGLE_DEG = -30;
-    const OPACITY = 0.18;
-    const FONT_SIZE = 14; // CSS px at 1x
+    const OPACITY = 0.45; // pill bg opacity
     const FONT_WEIGHT = 700;
-    const TILE_SPACING = 48; // px at 1x; effective tile is larger to fit rotation
 
     const selectors = [
       '[data-role="property-hero"] img',
@@ -57,53 +54,41 @@ export function useWatermark() {
         img.addEventListener("error", onError);
       });
 
-    const createPatternCanvas = (dpr: number) => {
-      const tileBase = TILE_SPACING * 4; // larger tile to get nice spacing when rotated
-      const tile = Math.max(160, tileBase); // min
-      const w = Math.round(tile * dpr);
-      const h = Math.round(tile * dpr);
-      const c = document.createElement("canvas");
-      c.width = w;
-      c.height = h;
-      const ctx = c.getContext("2d");
-      if (!ctx) return c;
+    const drawRoundedRect = (
+      ctx: CanvasRenderingContext2D,
+      x: number,
+      y: number,
+      w: number,
+      h: number,
+      r: number,
+    ) => {
+      const radius = Math.min(r, h / 2, w / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    };
 
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, tile, tile);
-
-      // Diagonal background is transparent; draw multiple instances
-      ctx.save();
-      ctx.translate(tile / 2, tile / 2);
-      ctx.rotate((ANGLE_DEG * Math.PI) / 180);
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `${FONT_WEIGHT} ${FONT_SIZE}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
-      ctx.fillStyle = `rgba(0,0,0,${OPACITY})`;
-      ctx.shadowColor = "rgba(0,0,0,0.15)";
-      ctx.shadowBlur = 1;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-
-      // Draw central text and 4 neighbors to ensure tiling continuity
-      const step = TILE_SPACING * 2;
-      const positions = [
-        [0, 0],
-        [-step, -step],
-        [step, step],
-        [-step, step],
-        [step, -step],
-      ];
-      for (const [x, y] of positions as number[][]) {
-        ctx.fillText(TEXT, x, y);
+    const measureTextWithSpacing = (
+      ctx: CanvasRenderingContext2D,
+      text: string,
+      letterSpacing: number,
+    ) => {
+      let w = 0;
+      const upper = text.toUpperCase();
+      for (let i = 0; i < upper.length; i++) {
+        const m = ctx.measureText(upper[i]);
+        w += m.width;
+        if (i !== upper.length - 1) w += letterSpacing;
       }
-      ctx.restore();
-
-      return c;
+      return w;
     };
 
     const bakeWatermark = async (img: HTMLImageElement) => {
       await ensureLoaded(img);
-      const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
 
       const w = img.naturalWidth;
       const h = img.naturalHeight;
@@ -123,24 +108,126 @@ export function useWatermark() {
       await loadPromise;
 
       const canvas = document.createElement("canvas");
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("ctx");
 
-      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
       ctx.drawImage(off, 0, 0, w, h);
 
-      // Overlay pattern
-      const patCanvas = createPatternCanvas(dpr);
-      const pat = ctx.createPattern(patCanvas, "repeat");
-      if (pat) {
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = pat as any;
-        ctx.fillRect(0, 0, w, h);
+      // Determine displayed size for responsive metrics
+      const rect = img.getBoundingClientRect();
+      const dispW = Math.max(1, rect.width || img.width || w);
+      const dispH = Math.max(1, rect.height || img.height || h);
+      const scale = w / dispW; // CSS px -> image px
+
+      const isMd = window.innerWidth >= 768;
+      const marginCss = isMd ? 14 : 8;
+      const padVcss = isMd ? 8 : 6;
+      const padHcss = isMd ? 10 : 8;
+      const baseFontCss = isMd ? 14 : 11;
+      const fontCss = dispH < 220 ? Math.max(10, baseFontCss - 1) : baseFontCss;
+      const letterSpacingCss = fontCss * 0.08;
+      const iconDiaCss = isMd ? 12 : 10;
+      const gapCss = isMd ? 6 : 5;
+
+      const margin = marginCss * scale;
+      let padV = padVcss * scale;
+      let padH = padHcss * scale;
+      let fontPx = fontCss * scale;
+      let letterSpacing = letterSpacingCss * scale;
+      let iconDia = iconDiaCss * scale;
+      let gap = gapCss * scale;
+
+      ctx.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+      const text = TEXT.toUpperCase();
+      let textW = measureTextWithSpacing(ctx, text, letterSpacing);
+      let iconW = iconDia;
+      let pillW = Math.ceil(padH + iconW + (iconW ? gap : 0) + textW + padH);
+      let pillH = Math.ceil(padV * 2 + Math.max(iconDia, fontPx));
+
+      // Constrain width to <= 28% of displayed width (in image px), and >= 120px
+      const maxAllowed = (dispW * 0.28) * scale;
+      const minAllowed = 120 * scale;
+      if (pillW > maxAllowed) {
+        const s = Math.max(0.6, maxAllowed / pillW);
+        fontPx *= s;
+        letterSpacing *= s;
+        iconDia *= s;
+        padV *= s;
+        padH *= s;
+        gap *= s;
+        ctx.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+        textW = measureTextWithSpacing(ctx, text, letterSpacing);
+        iconW = iconDia;
+        pillW = Math.ceil(padH + iconW + (iconW ? gap : 0) + textW + padH);
+        pillH = Math.ceil(padV * 2 + Math.max(iconDia, fontPx));
+      }
+      if (pillW < minAllowed) {
+        pillW = minAllowed;
       }
 
-      // Try to export without taint errors
+      const x = Math.max(0, w - pillW - margin);
+      const y = Math.max(0, h - pillH - margin);
+
+      // Draw pill background with shadow and border
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.25)";
+      ctx.shadowBlur = 2 * scale;
+      ctx.shadowOffsetY = 1 * scale;
+      drawRoundedRect(ctx, x, y, pillW, pillH, 9999 * scale);
+      ctx.fillStyle = `rgba(0,0,0,${OPACITY})`;
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.lineWidth = 1 * scale;
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.stroke();
+
+      // Optional gradient underline inside pill
+      const ulH = 2 * scale;
+      const ulY = y + pillH - ulH - 1 * scale;
+      const grad = ctx.createLinearGradient(x + padH, 0, x + pillW - padH, 0);
+      grad.addColorStop(0, "#0ea5e9");
+      grad.addColorStop(1, "#14b8a6");
+      ctx.fillStyle = grad;
+      drawRoundedRect(ctx, x + padH, ulY, pillW - padH * 2, ulH, ulH);
+      ctx.fill();
+
+      // Draw icon (circle + AP)
+      const cy = y + pillH / 2;
+      let cx = x + padH + iconDia / 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, iconDia / 2, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,0.12)";
+      ctx.fill();
+      ctx.lineWidth = 1 * scale;
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.stroke();
+      // AP letters
+      const monoFont = Math.max(8 * scale, iconDia * 0.55);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `${FONT_WEIGHT} ${monoFont}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("AP", cx, cy);
+
+      // Draw text
+      ctx.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      let tx = x + padH + iconDia + (iconDia ? gap : 0);
+      const ty = cy;
+      // manual letter spacing
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        ctx.fillText(ch, tx, ty);
+        tx += ctx.measureText(ch).width + letterSpacing;
+      }
+      ctx.restore();
+
+      // Export
       return await new Promise<string>((resolve, reject) => {
         try {
           canvas.toBlob(
@@ -149,7 +236,6 @@ export function useWatermark() {
                 const url = URL.createObjectURL(blob);
                 resolve(url);
               } else {
-                // Fallback to dataURL if blob failed
                 try {
                   const data = canvas.toDataURL();
                   resolve(data);
@@ -168,49 +254,92 @@ export function useWatermark() {
     };
 
     const setOverlay = (img: HTMLImageElement) => {
-      const parent = img.closest("[data-role=property-hero], .property-hero, .lightbox, [role=dialog], [role=dialog], [role='dialog']") || img.parentElement;
+      const parent =
+        img.closest(
+          "[data-role=property-hero], .property-hero, .lightbox, [role=dialog], [role='dialog']",
+        ) || img.parentElement;
       if (!parent) return;
 
       const host = parent as HTMLElement;
       const prev = host.querySelector<HTMLElement>("[data-wm-overlay='1']");
       if (prev) return;
 
+      const rect = img.getBoundingClientRect();
+      const dispW = Math.max(1, rect.width || img.width);
+      const dispH = Math.max(1, rect.height || img.height);
+      const isMd = window.innerWidth >= 768;
+
       // Ensure positioning context
       const style = window.getComputedStyle(host);
       if (style.position === "static") {
-        (host as HTMLElement).style.position = "relative";
+        host.style.position = "relative";
       }
 
       const overlay = document.createElement("div");
       overlay.setAttribute("data-wm-overlay", "1");
       overlay.setAttribute("aria-hidden", "true");
       overlay.style.position = "absolute";
-      overlay.style.inset = "0";
+      overlay.style.right = isMd ? "14px" : "8px";
+      overlay.style.bottom = isMd ? "14px" : "8px";
       overlay.style.pointerEvents = "none";
-      overlay.style.zIndex = "2";
-      overlay.style.mixBlendMode = "normal";
-      overlay.style.opacity = String(OPACITY);
+      overlay.style.zIndex = "3";
 
-      // Build SVG tile for CSS background
-      const tileSize = 240; // px
-      const svg = encodeURIComponent(
-        `<?xml version='1.0' encoding='UTF-8'?>` +
-          `<svg xmlns='http://www.w3.org/2000/svg' width='${tileSize}' height='${tileSize}' viewBox='0 0 ${tileSize} ${tileSize}'>` +
-          `<defs>` +
-          `<style>` +
-          `@font-face{font-family:Inter; font-weight:${FONT_WEIGHT}; src:local(Inter);}` +
-          `</style>` +
-          `</defs>` +
-          `<g transform='translate(${tileSize / 2} ${tileSize / 2}) rotate(${ANGLE_DEG})'>` +
-          `<text x='0' y='0' text-anchor='middle' dominant-baseline='central' font-family='Inter, Arial, sans-serif' font-weight='${FONT_WEIGHT}' font-size='${FONT_SIZE}' fill='rgba(0,0,0,1)'>${TEXT}</text>` +
-          `</g>` +
-          `</svg>`,
-      );
-      const dataUrl = `url("data:image/svg+xml,${svg}")`;
-      overlay.style.backgroundImage = dataUrl;
-      overlay.style.backgroundRepeat = "repeat";
-      overlay.style.backgroundSize = `${tileSize}px ${tileSize}px`;
+      // Build pill
+      const pill = document.createElement("div");
+      pill.style.position = "relative";
+      pill.style.display = "inline-flex";
+      pill.style.alignItems = "center";
+      pill.style.borderRadius = "9999px";
+      pill.style.background = "rgba(0,0,0,0.45)";
+      pill.style.padding = isMd ? "8px 10px" : "6px 8px";
+      pill.style.border = "1px solid rgba(255,255,255,0.15)";
+      pill.style.boxShadow = "0 1px 2px rgba(0,0,0,0.25)";
+      pill.style.backdropFilter = "blur(2px)";
+      pill.style.maxWidth = `${Math.floor(dispW * 0.28)}px`;
+      pill.style.minWidth = "120px";
 
+      const icon = document.createElement("span");
+      icon.textContent = "AP";
+      icon.style.display = "inline-flex";
+      icon.style.alignItems = "center";
+      icon.style.justifyContent = "center";
+      icon.style.width = isMd ? "12px" : "10px";
+      icon.style.height = isMd ? "12px" : "10px";
+      icon.style.borderRadius = "9999px";
+      icon.style.background = "rgba(255,255,255,0.12)";
+      icon.style.border = "1px solid rgba(255,255,255,0.25)";
+      icon.style.color = "#fff";
+      icon.style.fontWeight = String(FONT_WEIGHT);
+      icon.style.fontSize = isMd ? "8px" : "7px";
+      icon.style.marginRight = isMd ? "6px" : "5px";
+
+      const text = document.createElement("span");
+      text.textContent = TEXT;
+      text.style.color = "#fff";
+      text.style.fontWeight = String(FONT_WEIGHT);
+      text.style.textTransform = "uppercase";
+      const baseFont = dispH < 220 ? (isMd ? 13 : 10) : (isMd ? 14 : 11);
+      text.style.fontSize = `${baseFont}px`;
+      text.style.letterSpacing = `${Math.round(baseFont * 0.08)}px`;
+      text.style.whiteSpace = "nowrap";
+      text.style.overflow = "hidden";
+      text.style.textOverflow = "ellipsis";
+      text.style.maxWidth = `calc(${Math.floor(dispW * 0.28)}px - ${isMd ? 10 + 12 + 6 + 10 : 8 + 10 + 5 + 8}px)`;
+
+      // Gradient underline
+      const underline = document.createElement("div");
+      underline.style.position = "absolute";
+      underline.style.left = isMd ? "10px" : "8px";
+      underline.style.right = isMd ? "10px" : "8px";
+      underline.style.bottom = "2px";
+      underline.style.height = "2px";
+      underline.style.borderRadius = "2px";
+      underline.style.background = "linear-gradient(90deg, #0ea5e9, #14b8a6)";
+
+      pill.appendChild(icon);
+      pill.appendChild(text);
+      pill.appendChild(underline);
+      overlay.appendChild(pill);
       host.appendChild(overlay);
     };
 
@@ -224,15 +353,16 @@ export function useWatermark() {
           img.src = url;
           img.dataset.wmUrl = url;
           if (prev && prev.startsWith("blob:")) {
-            try { URL.revokeObjectURL(prev); } catch {}
+            try {
+              URL.revokeObjectURL(prev);
+            } catch {}
           }
           markProcessed(img);
           return;
         }
       } catch {
-        // fall back
+        // fall back to CSS overlay pill
       }
-      // CSS/SVG overlay fallback
       setOverlay(img);
       markProcessed(img);
     };
