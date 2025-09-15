@@ -222,9 +222,9 @@ function App() {
                   <Route path="/leads" element={<Leads />} />
                   <Route path="/notifications" element={<Notifications />} />
                   {/* Content Pages */}
-                  <Route path="/about-us" element={<ContentPage />} />
-                  <Route path="/privacy-policy" element={<ContentPage />} />
-                  <Route path="/terms-conditions" element={<ContentPage />} />
+                  <Route path="/about-us" element={<About />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-conditions" element={<TermsAndConditions />} />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
                   {/* Footer Test Page */}
