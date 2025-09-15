@@ -255,46 +255,45 @@ const ComprehensiveAuth = () => {
 
   // Google Login
   // Google Login (REAL Firebase popup + backend verify)
-const handleGoogleAuth = async (e?: React.MouseEvent) => {
-  e?.preventDefault();
-  if (loading) return;
+  const handleGoogleAuth = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    if (loading) return;
 
-  setLoading(true);
-  setError("");
-  setSuccess("");
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
-  try {
-    if (!isFirebaseConfigured) {
-      setError(
-        "Google authentication is not available: Firebase is not configured. Please set VITE_FIREBASE_* environment variables."
-      );
-      return;
+    try {
+      if (!isFirebaseConfigured) {
+        setError(
+          "Google authentication is not available: Firebase is not configured. Please set VITE_FIREBASE_* environment variables.",
+        );
+        return;
+      }
+
+      // 1) Chrome account chooser popup -> Firebase ID token
+      const { idToken } = await signInWithGoogle();
+
+      // 2) Send idToken to backend for verification
+      const { data } = await api.post("auth/google", {
+        idToken,
+        userType: formData.userType || "buyer",
+      });
+
+      if (!data?.success) {
+        throw new Error(data?.error || "Google authentication failed");
+      }
+
+      // 3) JWT + user context -> redirect
+      const { token, user } = data.data;
+      login(token, user);
+      redirectToCorrectDashboard(user.userType);
+    } catch (err: any) {
+      setError(err.message || "Google authentication failed");
+    } finally {
+      setLoading(false);
     }
-
-    // 1) Chrome account chooser popup -> Firebase ID token
-    const { idToken } = await signInWithGoogle();
-
-    // 2) Send idToken to backend for verification
-    const { data } = await api.post("auth/google", {
-      idToken,
-      userType: formData.userType || "buyer",
-    });
-
-    if (!data?.success) {
-      throw new Error(data?.error || "Google authentication failed");
-    }
-
-    // 3) JWT + user context -> redirect
-    const { token, user } = data.data;
-    login(token, user);
-    redirectToCorrectDashboard(user.userType);
-  } catch (err: any) {
-    setError(err.message || "Google authentication failed");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const redirectToCorrectDashboard = (userType: string) => {
     const routes = {
@@ -645,30 +644,33 @@ const handleGoogleAuth = async (e?: React.MouseEvent) => {
                     </p>
 
                     <Button
-  type="button"
-  onClick={handleGoogleAuth}
-  className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-  disabled={loading || !isFirebaseConfigured}
->
-  {loading ? (
-    <div className="flex items-center">
-      <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
-      Connecting...
-    </div>
-  ) : (
-    <div className="flex items-center">
-      {/* google icon svg ... */}
-      Continue with Google
-    </div>
-  )}
-</Button>
+                      type="button"
+                      onClick={handleGoogleAuth}
+                      className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                      disabled={loading || !isFirebaseConfigured}
+                    >
+                      {loading ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
+                          Connecting...
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          {/* google icon svg ... */}
+                          Continue with Google
+                        </div>
+                      )}
+                    </Button>
 
                     {!isFirebaseConfigured && (
                       <p className="text-xs text-gray-500 mt-2">
-                        Google sign-in is disabled because Firebase is not configured. To enable it, set the VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID and VITE_FIREBASE_APP_ID environment variables and restart the dev server.
+                        Google sign-in is disabled because Firebase is not
+                        configured. To enable it, set the VITE_FIREBASE_API_KEY,
+                        VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID and
+                        VITE_FIREBASE_APP_ID environment variables and restart
+                        the dev server.
                       </p>
                     )}
-
                   </div>
                 </div>
               )}
