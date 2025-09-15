@@ -51,6 +51,8 @@ import CategoryProperties from "./pages/CategoryProperties";
 import PropertyTypes from "./pages/PropertyTypes";
 import PropertyDetail from "./pages/PropertyDetail";
 import ContentPage from "./pages/ContentPage";
+import AboutUs from "./pages/AboutUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DynamicPage from "./pages/DynamicPage";
 import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -219,8 +221,8 @@ function App() {
                   <Route path="/leads" element={<Leads />} />
                   <Route path="/notifications" element={<Notifications />} />
                   {/* Content Pages */}
-                  <Route path="/about-us" element={<ContentPage />} />
-                  <Route path="/privacy-policy" element={<ContentPage />} />
+                  <Route path="/about-us" element={<AboutUs />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-conditions" element={<ContentPage />} />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
