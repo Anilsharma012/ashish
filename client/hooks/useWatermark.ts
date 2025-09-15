@@ -183,6 +183,7 @@ export function useWatermark() {
 
       const overlay = document.createElement("div");
       overlay.setAttribute("data-wm-overlay", "1");
+      overlay.setAttribute("aria-hidden", "true");
       overlay.style.position = "absolute";
       overlay.style.inset = "0";
       overlay.style.pointerEvents = "none";
