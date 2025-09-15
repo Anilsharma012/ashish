@@ -55,9 +55,13 @@ import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import DynamicPage from "./pages/DynamicPage";
+import About from "./pages/About";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
 import StaffAdmin from "./pages/StaffAdmin";
+import AdminReviewsModeration from "./pages/AdminReviewsModeration";
 import EnhancedSellerDashboard from "./pages/EnhancedSellerDashboard";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
@@ -193,6 +197,10 @@ function App() {
                   <Route path="/seller/blog" element={<SellerBlog />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/support" element={<Admin />} />
+                  <Route
+                    path="/admin/reviews"
+                    element={<AdminReviewsModeration />}
+                  />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route
                     path="/admin/ads/categories"
@@ -222,11 +230,19 @@ function App() {
                   <Route path="/leads" element={<Leads />} />
                   <Route path="/notifications" element={<Notifications />} />
                   {/* Content Pages */}
+ ai_main_e305f8c35a55
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route
                     path="/terms-conditions"
                     element={<TermsConditions />}
+
+                  <Route path="/about-us" element={<About />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route
+                    path="/terms-conditions"
+                    element={<TermsAndConditions />}
+ main
                   />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />

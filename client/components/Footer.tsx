@@ -329,13 +329,13 @@ export default function Footer() {
 
             // Create abort controller with timeout
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => {
+            const timeoutId = window.setTimeout(() => {
               try {
-                controller.abort();
-              } catch (e) {
+                if (!controller.signal.aborted) controller.abort("timeout");
+              } catch {
                 // Ignore abort errors
               }
-            }, 3000); // Reduced timeout to 3 seconds
+            }, 3000); // 3 seconds
 
             try {
               const response = await fetch(url, {
@@ -355,7 +355,7 @@ export default function Footer() {
                   const data = await response.json();
                   console.log(`✅ ${name} loaded successfully`);
                   resolve(data as any);
-                } catch (jsonError) {
+                } catch (jsonError: any) {
                   console.warn(
                     `❌ ${name} JSON parse failed:`,
                     jsonError?.message || "Unknown JSON error",
@@ -368,14 +368,18 @@ export default function Footer() {
                 );
                 resolve(null as any);
               }
-            } catch (fetchError) {
+            } catch (fetchError: any) {
               clearTimeout(timeoutId);
 
-              if (fetchError?.name === "AbortError") {
-                console.warn(`⏱️ ${name} fetch timeout after 3 seconds`);
+              if (
+                controller.signal.aborted ||
+                fetchError?.name === "AbortError"
+              ) {
+                console.warn(`⏱️ ${name} fetch aborted (timeout)`);
               } else if (
                 fetchError?.name === "TypeError" &&
-                fetchError?.message?.includes("fetch")
+                (fetchError?.message?.includes("fetch") ||
+                  fetchError?.message?.includes("Network"))
               ) {
                 console.warn(
                   `🌐 ${name} network error: ${fetchError?.message || "Network unavailable"}`,
