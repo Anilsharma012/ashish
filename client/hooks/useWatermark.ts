@@ -219,7 +219,12 @@ export function useWatermark() {
         const url = await bakeWatermark(img);
         if (url) {
           // Replace source with watermarked URL without layout shift
+          const prev = img.dataset.wmUrl;
           img.src = url;
+          img.dataset.wmUrl = url;
+          if (prev && prev.startsWith("blob:")) {
+            try { URL.revokeObjectURL(prev); } catch {}
+          }
           markProcessed(img);
           return;
         }
