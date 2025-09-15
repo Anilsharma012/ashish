@@ -30,6 +30,8 @@ import { toast } from "../components/ui/use-toast";
 import ApiDiagnostic from "../components/ApiDiagnostic";
 import EnquiryModal from "../components/EnquiryModal";
 import PropertyReviews from "../components/PropertyReviews";
+import ReviewsList from "../components/ReviewsList";
+import ReviewForm from "../components/ReviewForm";
 
 interface Property {
   _id: string;
