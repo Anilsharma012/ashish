@@ -648,7 +648,7 @@ const handleGoogleAuth = async (e?: React.MouseEvent) => {
   type="button"
   onClick={handleGoogleAuth}
   className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-  disabled={loading}
+  disabled={loading || !isFirebaseConfigured}
 >
   {loading ? (
     <div className="flex items-center">
