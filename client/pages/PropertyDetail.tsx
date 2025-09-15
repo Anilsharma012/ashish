@@ -606,6 +606,11 @@ export default function PropertyDetail() {
                 <div className="mt-6">
                   <PropertyReviews propertyId={property._id} />
                 </div>
+                <div className="mt-6">
+                  {/* Approved reviews list (new system) */}
+                  <ReviewsList targetId={property._id} targetType="property" />
+                  <ReviewForm targetId={property._id} targetType="property" />
+                </div>
               </CardContent>
             </Card>
           </div>
