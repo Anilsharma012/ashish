@@ -224,7 +224,10 @@ function App() {
                   {/* Content Pages */}
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-conditions" element={<TermsConditions />} />
+                  <Route
+                    path="/terms-conditions"
+                    element={<TermsConditions />}
+                  />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
                   {/* Footer Test Page */}
@@ -234,7 +237,10 @@ function App() {
                   <Route path="/page/:slug" element={<DynamicPage />} />
                   <Route path="/p/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/p/about-us" element={<AboutUs />} />
-                  <Route path="/p/terms-conditions" element={<TermsConditions />} />
+                  <Route
+                    path="/p/terms-conditions"
+                    element={<TermsConditions />}
+                  />
                   <Route path="/p/:slug" element={<ContentPage />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

@@ -418,7 +418,10 @@ export default function PropertyDetail() {
             {property.images.length > 0 && (
               <Card>
                 <CardContent className="p-0">
-                  <div className="relative aspect-video property-hero" data-role="property-hero">
+                  <div
+                    className="relative aspect-video property-hero"
+                    data-role="property-hero"
+                  >
                     <img
                       src={
                         property.coverImageUrl ??

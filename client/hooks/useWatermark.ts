@@ -15,9 +15,9 @@ export function useWatermark() {
 
     const selectors = [
       '[data-role="property-hero"] img',
-      '.property-hero img',
-      '.property-gallery img',
-      '.lightbox img',
+      ".property-hero img",
+      ".property-gallery img",
+      ".lightbox img",
       '[role="dialog"] img',
     ];
 
@@ -30,7 +30,8 @@ export function useWatermark() {
       return false;
     };
 
-    const alreadyProcessed = (img: HTMLImageElement) => img.dataset.wmProcessed === "1";
+    const alreadyProcessed = (img: HTMLImageElement) =>
+      img.dataset.wmProcessed === "1";
     const markProcessed = (img: HTMLImageElement) => {
       img.dataset.wmProcessed = "1";
     };
@@ -148,7 +149,7 @@ export function useWatermark() {
       let pillH = Math.ceil(padV * 2 + Math.max(iconDia, fontPx));
 
       // Constrain width to <= 28% of displayed width (in image px), and >= 120px
-      const maxAllowed = (dispW * 0.28) * scale;
+      const maxAllowed = dispW * 0.28 * scale;
       const minAllowed = 120 * scale;
       if (pillW > maxAllowed) {
         const s = Math.max(0.6, maxAllowed / pillW);
@@ -318,7 +319,7 @@ export function useWatermark() {
       text.style.color = "#fff";
       text.style.fontWeight = String(FONT_WEIGHT);
       text.style.textTransform = "uppercase";
-      const baseFont = dispH < 220 ? (isMd ? 13 : 10) : (isMd ? 14 : 11);
+      const baseFont = dispH < 220 ? (isMd ? 13 : 10) : isMd ? 14 : 11;
       text.style.fontSize = `${baseFont}px`;
       text.style.letterSpacing = `${Math.round(baseFont * 0.08)}px`;
       text.style.whiteSpace = "nowrap";
@@ -381,7 +382,9 @@ export function useWatermark() {
     );
 
     const observeExisting = () => {
-      const nodes = document.querySelectorAll<HTMLImageElement>(selectors.join(","));
+      const nodes = document.querySelectorAll<HTMLImageElement>(
+        selectors.join(","),
+      );
       nodes.forEach((img) => {
         if (!alreadyProcessed(img) && !exclude(img)) io.observe(img);
       });
@@ -394,13 +397,19 @@ export function useWatermark() {
             if (n instanceof HTMLImageElement) {
               if (!alreadyProcessed(n) && !exclude(n)) io.observe(n);
             } else if (n instanceof HTMLElement) {
-              const imgs = n.querySelectorAll<HTMLImageElement>(selectors.join(","));
+              const imgs = n.querySelectorAll<HTMLImageElement>(
+                selectors.join(","),
+              );
               imgs.forEach((img) => {
                 if (!alreadyProcessed(img) && !exclude(img)) io.observe(img);
               });
             }
           });
-        } else if (m.type === "attributes" && m.target instanceof HTMLImageElement && m.attributeName === "src") {
+        } else if (
+          m.type === "attributes" &&
+          m.target instanceof HTMLImageElement &&
+          m.attributeName === "src"
+        ) {
           const img = m.target as HTMLImageElement;
           img.dataset.wmProcessed = ""; // reset so it can reprocess on new src
           if (!exclude(img)) io.observe(img);
@@ -418,8 +427,12 @@ export function useWatermark() {
     });
 
     return () => {
-      try { io.disconnect(); } catch {}
-      try { mo.disconnect(); } catch {}
+      try {
+        io.disconnect();
+      } catch {}
+      try {
+        mo.disconnect();
+      } catch {}
       // Cleanup ephemeral overlays created; leave baked images as-is
       document
         .querySelectorAll<HTMLElement>("[data-wm-overlay='1']")
