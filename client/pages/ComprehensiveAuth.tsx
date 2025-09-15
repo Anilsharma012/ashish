@@ -663,6 +663,12 @@ const handleGoogleAuth = async (e?: React.MouseEvent) => {
   )}
 </Button>
 
+                    {!isFirebaseConfigured && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        Google sign-in is disabled because Firebase is not configured. To enable it, set the VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID and VITE_FIREBASE_APP_ID environment variables and restart the dev server.
+                      </p>
+                    )}
+
                   </div>
                 </div>
               )}
