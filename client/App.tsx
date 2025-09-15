@@ -83,6 +83,7 @@ import Step3Test from "./pages/Step3Test";
 import NetworkStatus from "./components/NetworkStatus";
 import AdsenseProvider from "./components/AdsenseProvider";
 import TitleSync from "./components/TitleSync";
+import DynamicPage from "./pages/DynamicPage";
 
 const queryClient = new QueryClient();
 
