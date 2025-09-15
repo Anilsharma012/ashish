@@ -264,10 +264,17 @@ const handleGoogleAuth = async (e?: React.MouseEvent) => {
   setSuccess("");
 
   try {
+    if (!isFirebaseConfigured) {
+      setError(
+        "Google authentication is not available: Firebase is not configured. Please set VITE_FIREBASE_* environment variables."
+      );
+      return;
+    }
+
     // 1) Chrome account chooser popup -> Firebase ID token
     const { idToken } = await signInWithGoogle();
 
-    // 2) Ab demo payload NHI, sirf idToken (plus userType) backend ko
+    // 2) Send idToken to backend for verification
     const { data } = await api.post("auth/google", {
       idToken,
       userType: formData.userType || "buyer",
