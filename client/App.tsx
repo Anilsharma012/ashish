@@ -53,10 +53,6 @@ import PropertyDetail from "./pages/PropertyDetail";
 import ContentPage from "./pages/ContentPage";
 import AboutUs from "./pages/AboutUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsConditions from "./pages/TermsConditions";
-import DynamicPage from "./pages/DynamicPage";
-import About from "./pages/About";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -87,6 +83,7 @@ import Step3Test from "./pages/Step3Test";
 import NetworkStatus from "./components/NetworkStatus";
 import AdsenseProvider from "./components/AdsenseProvider";
 import TitleSync from "./components/TitleSync";
+import DynamicPage from "./pages/DynamicPage";
 
 const queryClient = new QueryClient();
 
@@ -179,7 +176,7 @@ function App() {
                     path="/seller-dashboard"
                     element={
                       <SellerProtectedRoute>
-                        <SellerDashboard />
+                        <EnhancedSellerDashboard />
                       </SellerProtectedRoute>
                     }
                   />
@@ -221,7 +218,6 @@ function App() {
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/wishlist" element={<Favorites />} />
                   <Route path="/account/my-ads" element={<MyProperties />} />
-                  <Route path="/account/my-ads" element={<MyProperties />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/maps" element={<Maps />} />
@@ -229,35 +225,31 @@ function App() {
                   <Route path="/recent-views" element={<RecentViews />} />
                   <Route path="/leads" element={<Leads />} />
                   <Route path="/notifications" element={<Notifications />} />
+
                   {/* Content Pages */}
- ai_main_e305f8c35a55
                   <Route path="/about-us" element={<AboutUs />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route
                     path="/terms-conditions"
-                    element={<TermsConditions />}
-
-                  <Route path="/about-us" element={<About />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route
-                    path="/terms-conditions"
                     element={<TermsAndConditions />}
- main
                   />
                   <Route path="/refund-policy" element={<ContentPage />} />
                   <Route path="/contact-us" element={<ContentPage />} />
+
                   {/* Footer Test Page */}
                   <Route path="/footer-test" element={<FooterTest />} />
                   <Route path="/footer-debug" element={<FooterDebugPage />} />
+
                   {/* Dynamic Pages from Admin */}
                   <Route path="/page/:slug" element={<DynamicPage />} />
                   <Route path="/p/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/p/about-us" element={<AboutUs />} />
                   <Route
                     path="/p/terms-conditions"
-                    element={<TermsConditions />}
+                    element={<TermsAndConditions />}
                   />
                   <Route path="/p/:slug" element={<ContentPage />} />
+
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

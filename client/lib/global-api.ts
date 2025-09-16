@@ -130,9 +130,9 @@ function api(p: string, o: any = {}) {
         return { ok, status, success: ok, data, json: data };
       })
       .catch(async (error: any) => {
-        // Try XHR fallback on generic fetch failure
-        if (String(error?.message || "").includes("Failed to fetch")) {
-          console.warn("⚠️ fetch failed, attempting XHR fallback:", url);
+        // On any fetch failure (network / TypeError), try XHR fallback as a best-effort
+        try {
+          console.warn("⚠️ fetch failed, attempting XHR fallback:", url, error?.message || error);
           const res = await xhrFallback();
           clearTimeout(timeoutId);
           return {
@@ -142,23 +142,27 @@ function api(p: string, o: any = {}) {
             data: res.data,
             json: res.data,
           } as any;
-        }
+        } catch (xhrError) {
+          // If XHR fallback also fails, convert specific aborts/timeouts to TimeoutError
+          clearTimeout(timeoutId);
+          if (
+            error.name === "AbortError" ||
+            error?.message?.includes("aborted") ||
+            xhrError?.message?.includes("timeout")
+          ) {
+            const timeoutError = new Error(`Request timeout: ${url}`);
+            timeoutError.name = "TimeoutError";
+            throw timeoutError;
+          }
 
-        clearTimeout(timeoutId);
-        if (
-          error.name === "AbortError" ||
-          error?.message?.includes("aborted")
-        ) {
-          const timeoutError = new Error(`Request timeout: ${url}`);
-          timeoutError.name = "TimeoutError";
-          throw timeoutError;
+          const networkError = new Error(
+            `Network error: Cannot connect to server at ${url}`,
+          );
+          networkError.name = "NetworkError";
+          // Attach original errors for debugging
+          (networkError as any).cause = { fetchError: error, xhrError };
+          throw networkError;
         }
-
-        const networkError = new Error(
-          `Network error: Cannot connect to server at ${url}`,
-        );
-        networkError.name = "NetworkError";
-        throw networkError;
       });
   } catch (syncError: any) {
     // Synchronous throw from instrumented fetch; fallback to XHR
