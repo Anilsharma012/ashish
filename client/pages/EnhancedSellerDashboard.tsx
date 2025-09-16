@@ -76,6 +76,19 @@ import {
 } from "lucide-react";
 import OLXStyleHeader from "../components/OLXStyleHeader";
 import BottomNavigation from "../components/BottomNavigation";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 interface Notification {
   _id: string;
