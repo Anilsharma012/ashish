@@ -134,6 +134,11 @@ function OLXStyleCategories() {
   };
 
   const handleCategoryClick = (category: Category) => {
+    const slug = (category?.slug || "").toLowerCase();
+    if (["buy", "sale", "rent", "lease", "pg"].includes(slug)) {
+      window.location.href = `/${slug}`;
+      return;
+    }
     window.location.href = `/categories/${category.slug}`;
   };
 
