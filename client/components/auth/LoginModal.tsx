@@ -5,6 +5,7 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
 } from "../../lib/firebaseClient";
+import { isFirebaseConfigured } from "@/lib/firebase";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -65,9 +66,19 @@ export default function LoginModal() {
     }
     setLoading(true);
     try {
+      const full = `${countryCode}${phone.replace(/\D/g, "")}`;
+
+      // Fallback to server OTP when Firebase is not configured
+      if (!isFirebaseConfigured || !auth) {
+        const { data } = await api.post("auth/send-otp", { phone: full });
+        if (!data?.success)
+          throw new Error(data?.error || "Failed to send OTP");
+        setOtpSent(true);
+        return;
+      }
+
       if (!recaptchaRef.current) throw new Error("Recaptcha not ready");
       const verifier = await ensureInvisibleRecaptcha(recaptchaRef.current);
-      const full = `${countryCode}${phone.replace(/\D/g, "")}`;
       const res = await signInWithPhoneNumber(auth, full, verifier);
       confirmationRef.current = res;
       setOtpSent(true);
@@ -83,6 +94,22 @@ export default function LoginModal() {
     if (!code || code.length < 6) return setError("Enter 6-digit code");
     setLoading(true);
     try {
+      const full = `${countryCode}${phone.replace(/\D/g, "")}`;
+
+      // Server-side verification fallback
+      if (!isFirebaseConfigured || !auth || !confirmationRef.current) {
+        const { data } = await api.post("auth/verify-otp", {
+          phone: full,
+          otp: code,
+          userType: "seller",
+        });
+        if (data?.success && data.data) {
+          login(data.data.token, data.data.user);
+          return;
+        }
+        throw new Error(data?.error || "Invalid OTP");
+      }
+
       const result = await confirmationRef.current.confirm(code);
       const user = result.user as any;
       await loginWithFirebase(user, "seller");
