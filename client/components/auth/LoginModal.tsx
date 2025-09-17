@@ -71,7 +71,8 @@ export default function LoginModal() {
       // Fallback to server OTP when Firebase is not configured
       if (!isFirebaseConfigured || !auth) {
         const { data } = await api.post("auth/send-otp", { phone: full });
-        if (!data?.success) throw new Error(data?.error || "Failed to send OTP");
+        if (!data?.success)
+          throw new Error(data?.error || "Failed to send OTP");
         setOtpSent(true);
         return;
       }

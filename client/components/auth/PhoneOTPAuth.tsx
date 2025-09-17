@@ -112,11 +112,16 @@ export default function PhoneOTPAuth({
       console.log("Sending OTP to:", formattedPhone);
 
       if (!isFirebaseConfigured) {
-        const { data } = await api.post("auth/send-otp", { phone: formattedPhone });
-        if (!data?.success) throw new Error(data?.error || "Failed to send OTP");
+        const { data } = await api.post("auth/send-otp", {
+          phone: formattedPhone,
+        });
+        if (!data?.success)
+          throw new Error(data?.error || "Failed to send OTP");
       } else {
         if (!recaptchaInitialized) {
-          setError("Security verification not ready. Please wait or refresh the page.");
+          setError(
+            "Security verification not ready. Please wait or refresh the page.",
+          );
           setLoading(false);
           return;
         }
@@ -162,7 +167,8 @@ export default function PhoneOTPAuth({
           otp: otpCode,
           userType,
         });
-        if (!data?.success || !data?.data) throw new Error(data?.error || "Invalid OTP");
+        if (!data?.success || !data?.data)
+          throw new Error(data?.error || "Invalid OTP");
         // When using backend OTP, login via traditional context
         login(data.data.token, data.data.user);
         setSuccess("Phone number verified successfully!");
