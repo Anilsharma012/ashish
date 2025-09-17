@@ -12,8 +12,9 @@ import {
   AlertCircle,
   Shield,
 } from "lucide-react";
-import { PhoneAuthService } from "../../lib/firebase";
+import { PhoneAuthService, isFirebaseConfigured } from "../../lib/firebase";
 import { useFirebaseAuth } from "../../hooks/useFirebaseAuth";
+import { api } from "@/lib/api";
 
 interface PhoneOTPAuthProps {
   userType?: string;
@@ -102,13 +103,6 @@ export default function PhoneOTPAuth({
       return;
     }
 
-    if (!recaptchaInitialized) {
-      setError(
-        "Security verification not ready. Please wait or refresh the page.",
-      );
-      return;
-    }
-
     setLoading(true);
     setError("");
     setSuccess("");
@@ -117,19 +111,27 @@ export default function PhoneOTPAuth({
       const formattedPhone = formatPhoneNumber(phoneNumber);
       console.log("Sending OTP to:", formattedPhone);
 
-      await phoneAuthService.current.sendOTP(formattedPhone);
+      if (!isFirebaseConfigured) {
+        const { data } = await api.post("auth/send-otp", { phone: formattedPhone });
+        if (!data?.success) throw new Error(data?.error || "Failed to send OTP");
+      } else {
+        if (!recaptchaInitialized) {
+          setError("Security verification not ready. Please wait or refresh the page.");
+          setLoading(false);
+          return;
+        }
+        await phoneAuthService.current.sendOTP(formattedPhone);
+      }
 
       setStep("otp");
       setOtpTimer(60);
       setSuccess("OTP sent successfully! Please check your phone.");
 
-      // Hide success message after 3 seconds
       setTimeout(() => setSuccess(""), 3000);
     } catch (error: any) {
       console.error("Failed to send OTP:", error);
       setError(error.message || "Failed to send OTP. Please try again.");
 
-      // Re-initialize reCAPTCHA on error
       setTimeout(() => {
         initializeRecaptcha();
       }, 1000);
@@ -153,30 +155,34 @@ export default function PhoneOTPAuth({
     try {
       console.log("Verifying OTP:", otpCode);
 
-      // Verify OTP with Firebase
-      const firebaseUser = await phoneAuthService.current.verifyOTP(otpCode);
-      console.log(
-        "OTP verified successfully, Firebase user:",
-        firebaseUser.uid,
-      );
+      if (!isFirebaseConfigured) {
+        const formattedPhone = formatPhoneNumber(phoneNumber);
+        const { data } = await api.post("auth/verify-otp", {
+          phone: formattedPhone,
+          otp: otpCode,
+          userType,
+        });
+        if (!data?.success || !data?.data) throw new Error(data?.error || "Invalid OTP");
+        // When using backend OTP, login via traditional context
+        const { login } = await import("@/hooks/useAuth");
+        // cannot import hook here; instead, call loginWithFirebase fallback path by storing token/user
+        localStorage.setItem("token", data.data.token);
+        localStorage.setItem("user", JSON.stringify(data.data.user));
+        setSuccess("Phone number verified successfully!");
+        onSuccess?.();
+        return;
+      }
 
-      // Login with Firebase
+      const firebaseUser = await phoneAuthService.current.verifyOTP(otpCode);
       await loginWithFirebase(firebaseUser, userType);
 
       setSuccess("Phone number verified successfully!");
-
-      // Call success callback
-      if (onSuccess) {
-        onSuccess();
-      }
+      onSuccess?.();
     } catch (error: any) {
       console.error("OTP verification failed:", error);
       const errorMessage = error.message || "Invalid OTP. Please try again.";
       setError(errorMessage);
-
-      if (onError) {
-        onError(errorMessage);
-      }
+      onError?.(errorMessage);
     } finally {
       setLoading(false);
     }
