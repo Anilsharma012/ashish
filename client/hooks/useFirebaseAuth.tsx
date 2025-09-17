@@ -145,6 +145,20 @@ export const FirebaseAuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
+    // If Firebase is not configured, there will be no auth listener callback.
+    // Ensure we don't stay in loading state indefinitely in that case.
+    try {
+      // Importing isFirebaseConfigured lazily to avoid circular deps
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { isFirebaseConfigured } = require("../lib/firebase");
+      if (!isFirebaseConfigured) {
+        setLoading(false);
+      }
+    } catch (e) {
+      // If anything goes wrong, ensure loading is disabled so app can proceed
+      setLoading(false);
+    }
+
     return () => unsubscribe();
   }, []);
 
