@@ -164,10 +164,7 @@ export default function PhoneOTPAuth({
         });
         if (!data?.success || !data?.data) throw new Error(data?.error || "Invalid OTP");
         // When using backend OTP, login via traditional context
-        const { login } = await import("@/hooks/useAuth");
-        // cannot import hook here; instead, call loginWithFirebase fallback path by storing token/user
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
+        login(data.data.token, data.data.user);
         setSuccess("Phone number verified successfully!");
         onSuccess?.();
         return;
