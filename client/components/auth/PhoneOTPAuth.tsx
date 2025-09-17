@@ -29,7 +29,7 @@ export default function PhoneOTPAuth({
   onError,
   className = "",
 }: PhoneOTPAuthProps) {
-  const { loginWithFirebase } = useFirebaseAuth();
+  const { loginWithFirebase, login } = useFirebaseAuth();
   const phoneAuthService = useRef(new PhoneAuthService());
 
   const [step, setStep] = useState<"phone" | "otp">("phone");
