@@ -21,7 +21,8 @@ async function loadEmailConfig() {
       process.env.SMTP_PASSWORD ||
       process.env.SMTP_PASS ||
       "";
-    const from = cfg.fromEmail || process.env.SMTP_FROM || user || "no-reply@localhost";
+    const from =
+      cfg.fromEmail || process.env.SMTP_FROM || user || "no-reply@localhost";
     return { host, port, user, pass, from };
   } catch {
     const host = process.env.SMTP_HOST || "smtp.gmail.com";
@@ -51,7 +52,9 @@ export async function getTransporter() {
   const isDev = process.env.NODE_ENV !== "production";
   const hasAuth = Boolean(cfg.user) && Boolean(cfg.pass);
 
-  const hash = configHash(cfg) + `:${isDev ? "dev" : "prod"}:${hasAuth ? "auth" : "noauth"}`;
+  const hash =
+    configHash(cfg) +
+    `:${isDev ? "dev" : "prod"}:${hasAuth ? "auth" : "noauth"}`;
   if (cachedTransporter && cachedConfigHash === hash)
     return { transporter: cachedTransporter, from: cfg.from };
 
@@ -60,7 +63,8 @@ export async function getTransporter() {
   // If we are in dev or logging mode and no SMTP credentials are configured,
   // use a JSON transport that does not send real email but succeeds.
   const useJsonTransport =
-    isDev && (!hasAuth || String(process.env.EMAIL_MODE || "").toLowerCase() === "log");
+    isDev &&
+    (!hasAuth || String(process.env.EMAIL_MODE || "").toLowerCase() === "log");
 
   if (useJsonTransport) {
     cachedTransporter = nodemailer.createTransport({ jsonTransport: true });
