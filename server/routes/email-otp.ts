@@ -1,6 +1,5 @@
 import type { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { sendEmail } from "../utils/mailer";
 import { getDatabase } from "../db/mongodb";
 
@@ -37,10 +36,18 @@ export const requestEmailOtp: RequestHandler = async (req, res) => {
     try {
       await sendEmail(email, subject, html, `Your OTP code is ${code}`);
     } catch (e: any) {
-      // Do not leak internals; still keep code in store for retries
-      return res
-        .status(500)
-        .json({ success: false, error: "Failed to send OTP email" });
+      // If email fails in production, return an error
+      if (process.env.NODE_ENV === "production") {
+        return res
+          .status(500)
+          .json({ success: false, error: "Failed to send OTP email" });
+      }
+      // In development, do not block login flows — return success and surface the OTP for debugging
+      console.log(`[DEV] Email OTP for ${email}: ${code}`);
+      return res.json({
+        success: true,
+        data: { message: "OTP sent (dev)", devOtp: code },
+      });
     }
 
     return res.json({ success: true, data: { message: "OTP sent" } });

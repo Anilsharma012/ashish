@@ -38,6 +38,7 @@ export default function LoginModal() {
   const [email, setEmail] = useState("");
   const [emailOtp, setEmailOtp] = useState("");
   const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   useEffect(() => {
     // Prepare recaptcha container
@@ -95,6 +96,7 @@ export default function LoginModal() {
 
   const requestEmailOtp = async () => {
     setError("");
+    setDevOtp(null);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Enter valid email");
       return;
@@ -102,8 +104,12 @@ export default function LoginModal() {
     setLoading(true);
     try {
       const { data } = await api.post("auth/email/request-otp", { email });
-      if (data?.success) setEmailOtpSent(true);
-      else setError(data?.error || "Failed to send OTP");
+      if (data?.success) {
+        setEmailOtpSent(true);
+        // In development, backend may include devOtp for testing
+        const maybeOtp = data?.data?.devOtp as string | undefined;
+        if (import.meta.env.DEV && maybeOtp) setDevOtp(maybeOtp);
+      } else setError(data?.error || "Failed to send OTP");
     } catch (e: any) {
       setError(e?.message || "Failed to send OTP");
     } finally {
@@ -226,6 +232,11 @@ export default function LoginModal() {
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {import.meta.env.DEV && devOtp ? (
+                    <p className="text-xs text-gray-500">
+                      Development mode: Use OTP <strong>{devOtp}</strong>
+                    </p>
+                  ) : null}
                   <Input
                     aria-label="Email OTP"
                     value={emailOtp}
