@@ -182,13 +182,6 @@ export const getSubcategoriesWithCounts: RequestHandler = async (req, res) => {
         active: true,
       });
 
-      if (!categoryDoc) {
-        return res.status(404).json({
-          success: false,
-          error: "Category not found",
-        });
-      }
-
       // Get live subcategory data by aggregating actual approved properties
       // For buy/sale categories, filter by priceType, for others use propertyType
       const propertyFilter: any = {
@@ -227,6 +220,23 @@ export const getSubcategoriesWithCounts: RequestHandler = async (req, res) => {
           },
         ])
         .toArray();
+
+      // If category definition not found, synthesize minimal objects from counts
+      if (!categoryDoc) {
+        const result = subcategoriesWithCounts
+          .filter((i: any) => !!i._id)
+          .map((item: any) => {
+            const slug = item._id as string;
+            const name = slug
+              .split(/[-_\s]+/)
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" ");
+            return { id: slug, slug, name, count: item.count } as any;
+          })
+          .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+        return res.json({ success: true, data: result });
+      }
 
       // Map to include subcategory details from the category definition
       const result = subcategoriesWithCounts
