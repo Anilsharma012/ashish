@@ -25,13 +25,6 @@ export const getSubcategories: RequestHandler = async (req, res) => {
         active: true,
       });
 
-      if (!categoryDoc) {
-        return res.status(404).json({
-          success: false,
-          error: "Category not found",
-        });
-      }
-
       // Get live subcategory data by checking which subcategories have approved properties
       // For buy/sale categories, filter by priceType, for others use propertyType
       const propertyFilter: any = {
@@ -55,6 +48,23 @@ export const getSubcategories: RequestHandler = async (req, res) => {
 
       const subcategoriesWithApprovedProperties =
         await propertiesCollection.distinct("subCategory", propertyFilter);
+
+      // If category definition not found in DB, gracefully fall back to distinct subCategory list
+      if (!categoryDoc) {
+        const distinctSubs = subcategoriesWithApprovedProperties
+          .filter((s: any) => !!s)
+          .map((slug: string) => ({
+            id: slug,
+            slug,
+            name: slug
+              .split(/[-_\s]+/)
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" "),
+          }))
+          .sort((a: any, b: any) => a.name.localeCompare(b.name));
+
+        return res.json({ success: true, data: distinctSubs });
+      }
 
       // Get all subcategories for this category
       const allSubcategories = (categoryDoc.subcategories || []).sort(
