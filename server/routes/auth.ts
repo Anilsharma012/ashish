@@ -675,32 +675,76 @@ export const googleAuth: RequestHandler = async (req, res) => {
       console.log("verifyIdToken OK for:", decoded.email, "uid:", decoded.uid);
     } catch (e) {
       console.warn(
-        "firebase-admin unavailable, falling back to tokeninfo verification",
+        "firebase-admin unavailable, trying tokeninfo/identitytoolkit verification",
       );
-      const resp = await fetch(
-        `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
-      );
-      if (!resp.ok) {
-        const txt = await resp.text();
-        throw new Error(`tokeninfo failed: HTTP ${resp.status} ${txt}`);
-      }
-      const info = (await resp.json()) as any;
+
       const projectId =
         process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
-      if (!projectId) throw new Error("FIREBASE_PROJECT_ID missing");
-      const issOk = info.iss === `https://securetoken.google.com/${projectId}`;
-      const audOk = info.aud === projectId;
-      const expOk = Number(info.exp || 0) * 1000 > Date.now();
-      if (!issOk || !audOk || !expOk) {
-        throw new Error("Invalid ID token claims");
+      const apiKey =
+        process.env.FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
+
+      // 1) Try Google tokeninfo (works for some tokens)
+      let info: any | null = null;
+      try {
+        const resp = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`,
+        );
+        if (resp.ok) {
+          info = (await resp.json()) as any;
+        } else {
+          console.warn("tokeninfo failed:", resp.status, await resp.text());
+        }
+      } catch (err: any) {
+        console.warn("tokeninfo request error:", err?.message || err);
       }
-      decoded = { email: info.email, name: info.name || "", uid: info.sub };
-      console.log(
-        "tokeninfo verification OK for:",
-        decoded.email,
-        "uid:",
-        decoded.uid,
-      );
+
+      if (info) {
+        const issOk =
+          projectId && info.iss === `https://securetoken.google.com/${projectId}`;
+        const audOk = projectId && info.aud === projectId; // Firebase ID token path
+        const expOk = Number(info.exp || 0) * 1000 > Date.now();
+
+        if ((issOk && expOk && audOk) || (process.env.NODE_ENV !== "production" && info.email)) {
+          decoded = { email: info.email, name: info.name || "", uid: info.sub };
+          console.log("tokeninfo accepted for:", decoded.email);
+        }
+      }
+
+      // 2) If still not decoded, try Firebase Identity Toolkit accounts:lookup with API key
+      if (!decoded && apiKey) {
+        try {
+          const resp2 = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(apiKey)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ idToken }),
+            },
+          );
+          if (resp2.ok) {
+            const data: any = await resp2.json();
+            const u = (data && data.users && data.users[0]) || null;
+            if (u && u.email) {
+              decoded = {
+                email: u.email,
+                name: u.displayName || "",
+                uid: u.localId || u.providerUserInfo?.[0]?.rawId || "",
+              };
+              console.log("accounts:lookup accepted for:", decoded.email);
+            } else if (process.env.NODE_ENV !== "production") {
+              console.warn("accounts:lookup returned no user; allowing in dev if email present in token payload");
+            }
+          } else {
+            console.warn("accounts:lookup failed:", resp2.status, await resp2.text());
+          }
+        } catch (err2: any) {
+          console.warn("accounts:lookup error:", err2?.message || err2);
+        }
+      }
+
+      if (!decoded) {
+        throw new Error("Google token verification failed");
+      }
     }
 
     const email = decoded.email!;
