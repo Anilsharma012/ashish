@@ -57,8 +57,17 @@ let app: any = null;
 let analytics: any = undefined;
 if (isConfigured) {
   app = initializeApp(firebaseConfig);
-  if (typeof window !== "undefined") {
-    analytics = getAnalytics(app);
+  // Initialize Analytics only when measurementId is present and in browser
+  if (
+    typeof window !== "undefined" &&
+    Boolean(firebaseConfig.measurementId)
+  ) {
+    try {
+      analytics = getAnalytics(app);
+    } catch (e) {
+      // Avoid crashing on analytics/installation registration issues in dev
+      console.warn("Analytics initialization skipped:", (e as any)?.message || e);
+    }
   }
 } else {
   console.warn(
