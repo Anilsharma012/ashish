@@ -7,7 +7,8 @@ import BottomNavigation from "../components/BottomNavigation";
 import StaticFooter from "../components/StaticFooter";
 
 interface Subcategory {
-  id: string;
+  id?: string;
+  _id?: string;
   name: string;
   slug: string;
   description: string;
@@ -141,7 +142,7 @@ export default function Sale() {
           <div className="grid grid-cols-2 gap-3">
             {subcategories.map((subcategory) => (
               <button
-                key={subcategory.id}
+                key={subcategory._id || subcategory.id || subcategory.slug}
                 onClick={() => handleSubcategoryClick(subcategory)}
                 className="subcat-card bg-white border border-gray-200 rounded-lg p-4 text-left hover:bg-gray-50 transition-colors shadow-sm"
                 data-testid="subcat-card"
