@@ -17,9 +17,17 @@ interface EmailVerifyResponse {
   error?: string;
 }
 
+import { useNavigate } from "react-router-dom";
+
 export default function LoginModal() {
+  const navigate = useNavigate();
   const { login, loginWithFirebase } = useAuth();
   const [tab, setTab] = useState<"phone" | "email">("phone");
+
+  // Immediately redirect to unified auth page to avoid modal usage across site
+  useEffect(() => {
+    navigate('/auth', { replace: true });
+  }, [navigate]);
 
   // Shared
   const [loading, setLoading] = useState(false);
