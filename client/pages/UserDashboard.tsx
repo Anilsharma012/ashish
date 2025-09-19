@@ -463,6 +463,7 @@ const UserDashboard = () => {
                       <div className="w-full lg:w-48 h-32 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                         {property.images && property.images.length > 0 ? (
                           <img
+                            data-wm="1"
                             src={property.images[0]}
                             alt={property.title}
                             className="w-full h-full object-cover"
