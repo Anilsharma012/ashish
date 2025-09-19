@@ -634,6 +634,7 @@ export default function CategoryProperties() {
                       }`}
                     >
                       <img
+                        data-wm="1"
                         src={
                           property.coverImageUrl ??
                           property.images?.[0]?.url ??
