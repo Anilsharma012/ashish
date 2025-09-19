@@ -545,11 +545,11 @@ export default function Favorites() {
                       <div className="aspect-video w-full bg-gray-200 rounded-t-lg overflow-hidden">
                         {property.images && property.images.length > 0 ? (
                           <img
-                              data-wm="1"
-                              src={property.images[0]}
-                              alt={property.title}
-                              className="w-full h-full object-cover"
-                            />
+                            data-wm="1"
+                            src={property.images[0]}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Home className="h-12 w-12 text-gray-400" />

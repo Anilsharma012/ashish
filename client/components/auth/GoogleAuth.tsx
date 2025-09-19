@@ -36,7 +36,7 @@ export default function GoogleAuth({
     try {
       if (!isFirebaseConfigured) {
         throw new Error(
-          "Google login is unavailable. Firebase is not configured."
+          "Google login is unavailable. Firebase is not configured.",
         );
       }
 

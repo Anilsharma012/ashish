@@ -15,9 +15,9 @@ export function useWatermark() {
 
     const selectors = [
       '[data-role="property-hero"] img',
-      '.property-hero img',
-      '.property-gallery img',
-      '.lightbox img',
+      ".property-hero img",
+      ".property-gallery img",
+      ".lightbox img",
       '[role="dialog"] img',
       'img[data-wm="1"]',
     ];
