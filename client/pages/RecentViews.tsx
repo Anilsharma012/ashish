@@ -87,6 +87,7 @@ export default function RecentViews() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  useWatermark();
   const [recentViews, setRecentViews] = useState<ViewedProperty[]>([]);
   const [viewingSessions, setViewingSessions] = useState<ViewingSession[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
