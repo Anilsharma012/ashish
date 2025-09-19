@@ -145,17 +145,13 @@ function OLXStyleCategories() {
       if (Array.isArray(category.subcategories) && category.subcategories.length)
         return setActiveSubcats(category.subcategories);
 
-      // Fallback: fetch subcategories by slug from admin
-      const resp = await fetch(`/api/categories/${category.slug}/subcategories`, {
-        headers: { "Content-Type": "application/json" },
-        cache: "no-cache",
-      });
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data?.success && Array.isArray(data.data)) {
-          setActiveSubcats(data.data);
-          return;
-        }
+      // Fallback: fetch subcategories by slug from admin via global API
+      const apiRes = await (window as any).api(
+        `/categories/${category.slug}/subcategories`,
+      );
+      if (apiRes && apiRes.ok && apiRes.json?.success && Array.isArray(apiRes.json.data)) {
+        setActiveSubcats(apiRes.json.data);
+        return;
       }
       setActiveSubcats([]);
     } catch (e) {
