@@ -60,7 +60,8 @@ if (isConfigured) {
   // Initialize Analytics only when measurementId is present and in browser
   if (
     typeof window !== "undefined" &&
-    Boolean(firebaseConfig.measurementId)
+    Boolean(firebaseConfig.measurementId) &&
+    import.meta.env.MODE === "production"
   ) {
     try {
       analytics = getAnalytics(app);
