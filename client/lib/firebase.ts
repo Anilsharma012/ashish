@@ -7,6 +7,8 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -257,13 +259,31 @@ export const signInWithGoogle = async (): Promise<{
 }> => {
   try {
     if (!auth) throw new Error("Firebase not configured");
-    const result = await signInWithPopup(auth, googleProvider); // Chrome popup
+
+    // First, handle redirect result if present (for environments where popups are blocked)
+    try {
+      const redirectRes = await getRedirectResult(auth);
+      if (redirectRes && redirectRes.user) {
+        const u = redirectRes.user;
+        const idToken = await u.getIdToken(true);
+        return {
+          idToken,
+          profile: {
+            uid: u.uid,
+            email: u.email,
+            name: u.displayName,
+            photoURL: u.photoURL,
+          },
+        };
+      }
+    } catch {}
+
+    // Try popup normally
+    const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    // >>> yahi important hai: backend verify ke liye Firebase ID token
     const idToken = await user.getIdToken(true);
 
-    console.log("Google authentication successful");
     return {
       idToken,
       profile: {
@@ -276,6 +296,22 @@ export const signInWithGoogle = async (): Promise<{
   } catch (error) {
     console.error("Google authentication failed:", error);
     const authError = error as AuthError;
+
+    // Fallback to redirect when popup/cookies/domains cause issues
+    if (
+      authError.code === "auth/popup-blocked" ||
+      authError.code === "auth/operation-not-supported-in-this-environment" ||
+      authError.code === "auth/network-request-failed" ||
+      authError.code === "auth/unauthorized-domain"
+    ) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        // Redirecting; return a pending promise to avoid further handling
+        return new Promise(() => {}) as any;
+      } catch (e) {
+        // fallthrough to error mapping below
+      }
+    }
 
     let message = "Google authentication failed";
     switch (authError.code) {
