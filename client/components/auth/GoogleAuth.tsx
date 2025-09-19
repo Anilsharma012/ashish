@@ -26,6 +26,7 @@ export default function GoogleAuth({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const disabled = !isFirebaseConfigured;
 
   const handleGoogleLogin = async () => {
     setLoading(true);
