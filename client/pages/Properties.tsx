@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
 import { Button } from "../components/ui/button";
 import { Property } from "@shared/types";
+import { useWatermark } from "../hooks/useWatermark";
 
 export default function Properties() {
   const [searchParams] = useSearchParams();
