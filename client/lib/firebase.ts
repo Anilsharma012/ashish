@@ -294,6 +294,10 @@ export const signInWithGoogle = async (): Promise<{
       case "auth/unauthorized-domain":
         message = "This domain is not authorized for Google authentication";
         break;
+      case "auth/network-request-failed":
+        message =
+          "Network error. Add this preview domain to Firebase > Authentication > Settings > Authorized domains, then retry.";
+        break;
       default:
         message = authError.message || "Google authentication failed";
     }
