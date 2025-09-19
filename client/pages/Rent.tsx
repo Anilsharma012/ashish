@@ -26,18 +26,18 @@ export default function Rent() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      // STEP 4 requirement: await api('/subcategories?category=rent&approved=true')
+      // Use public endpoint backed by admin data
       const apiResponse = await (window as any).api(
-        "/subcategories?category=rent&approved=true",
+        "/categories/rent/subcategories",
       );
-      const data = apiResponse.ok
-        ? apiResponse.json
-        : { success: false, error: "Failed to fetch subcategories" };
-
-      if (data.success) {
-        setSubcategories(data.data);
+      if (apiResponse.ok && apiResponse.json?.success) {
+        setSubcategories(apiResponse.json.data || []);
       } else {
-        throw new Error(data.error || "Failed to fetch subcategories");
+        console.warn(
+          "Subcategories API non-OK; using fallback",
+          apiResponse.status,
+          apiResponse.json?.error,
+        );
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
