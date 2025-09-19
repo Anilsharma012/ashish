@@ -135,8 +135,37 @@ function OLXStyleCategories() {
     }
   };
 
-  const handleCategoryClick = (category: Category) => {
-    window.location.href = `/categories/${category.slug}`;
+  const handleCategoryClick = async (category: Category) => {
+    try {
+      // Toggle if same category
+      if (activeCat && activeCat.slug === category.slug) {
+        setActiveCat(null);
+        setActiveSubcats([]);
+        return;
+      }
+      setActiveCat(category);
+
+      // Prefer embedded subcategories from admin API
+      if (Array.isArray(category.subcategories) && category.subcategories.length)
+        return setActiveSubcats(category.subcategories);
+
+      // Fallback: fetch subcategories by slug from admin
+      const resp = await fetch(`/api/categories/${category.slug}/subcategories`, {
+        headers: { "Content-Type": "application/json" },
+        cache: "no-cache",
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data?.success && Array.isArray(data.data)) {
+          setActiveSubcats(data.data);
+          return;
+        }
+      }
+      setActiveSubcats([]);
+    } catch (e) {
+      console.warn("Failed to load subcategories:", (e as any)?.message || e);
+      setActiveSubcats([]);
+    }
   };
 
   const handleSellClick = () => {
