@@ -147,11 +147,20 @@ export default function TestimonialManagement() {
     }
   };
 
-  const filteredTestimonials = testimonials.filter(testimonial => {
-    const matchesSearch = testimonial.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         testimonial.comment.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTestimonials = testimonials.filter((testimonial) => {
+    const q = (searchTerm || "").toLowerCase().trim();
+
+    const name = (testimonial.name || "").toString();
+    const comment = (testimonial.comment || "").toString();
+
+    const matchesSearch =
+      q === "" ||
+      name.toLowerCase().includes(q) ||
+      comment.toLowerCase().includes(q) ||
+      (testimonial.email || "").toString().toLowerCase().includes(q);
+
     const matchesStatus = selectedStatus === "all" || testimonial.status === selectedStatus;
-    
+
     return matchesSearch && matchesStatus;
   });
 
