@@ -34,7 +34,11 @@ export async function safeFetch(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, {
+    const resolvedUrl = url.startsWith("/api/")
+      ? createApiUrl(url.slice(5))
+      : url;
+
+    const response = await fetch(resolvedUrl, {
       ...fetchOptions,
       signal: controller.signal,
       headers: {
