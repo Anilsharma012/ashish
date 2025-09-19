@@ -3,8 +3,8 @@ import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/mailer";
 import { getDatabase } from "../db/mongodb";
 
-// In-memory OTP store with TTL (email -> { code, expiresAt })
-const emailOtpStore = new Map<string, { code: string; expiresAt: number }>();
+// Store email OTPs in MongoDB for reliability across restarts
+// Collection: email_otps { email: string, otp: string, createdAt: Date, expiresAt: Date }
 
 const JWT_SECRET =
   process.env.JWT_MOCK_SECRET || process.env.JWT_SECRET || "change-this";
@@ -26,9 +26,20 @@ export const requestEmailOtp: RequestHandler = async (req, res) => {
         .json({ success: false, error: "Valid email is required" });
     }
 
+    const lower = email.toLowerCase();
     const code = generateOtp();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
-    emailOtpStore.set(email.toLowerCase(), { code, expiresAt });
+    const now = new Date();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Persist OTP in DB (one active code per email)
+    const db = getDatabase();
+    await db.collection("email_otps").deleteMany({ email: lower });
+    await db.collection("email_otps").insertOne({
+      email: lower,
+      otp: code,
+      createdAt: now,
+      expiresAt,
+    });
 
     const subject = "Your OTP | Ashish Property";
     const html = `<p>Your Ashish Property verification code is <strong style="font-size:18px">${code}</strong>.</p><p>This code will expire in 10 minutes. If you did not request this, you can ignore this email.</p>`;
@@ -65,25 +76,32 @@ export const verifyEmailOtp: RequestHandler = async (req, res) => {
         .json({ success: false, error: "Email and OTP are required" });
     }
 
-    const rec = emailOtpStore.get(String(email).toLowerCase());
-    if (!rec || rec.code !== String(otp) || isExpired(rec.expiresAt)) {
+    const lower = String(email).toLowerCase();
+    const db = getDatabase();
+
+    const rec = await db.collection("email_otps").findOne({
+      email: lower,
+      otp: String(otp),
+      expiresAt: { $gt: new Date() },
+    });
+
+    if (!rec) {
       return res
         .status(400)
         .json({ success: false, error: "Invalid or expired OTP" });
     }
 
     // One-time use: delete after successful verification
-    emailOtpStore.delete(String(email).toLowerCase());
+    await db.collection("email_otps").deleteOne({ _id: rec._id });
 
     // Find-or-create user minimally by email
-    const db = getDatabase();
-    let user = await db.collection("users").findOne({ email });
+    let user = await db.collection("users").findOne({ email: lower });
     if (!user) {
       const now = new Date();
-      const name = email.split("@")[0];
+      const name = lower.split("@")[0];
       const doc = {
         name,
-        email,
+        email: lower,
         phone: "",
         userType: "seller",
         createdAt: now,
