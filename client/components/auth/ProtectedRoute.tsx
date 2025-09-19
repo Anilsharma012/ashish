@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({
   children,
   requiredUserTypes = [],
-  fallbackPath = "/firebase-auth",
+  fallbackPath = "/auth",
   requireAuth = true,
 }: ProtectedRouteProps) {
   const { isAuthenticated, user, loading } = useFirebaseAuth();
