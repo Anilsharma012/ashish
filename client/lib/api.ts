@@ -394,13 +394,17 @@ export const api = {
       body: data ? JSON.stringify(data) : undefined,
       headers,
     });
-    if (!response.ok)
-      throw new Error(
+    if (!response.ok) {
+      const message =
         response.data?.error ||
-          response.data?.message ||
-          (typeof response.data?.raw === "string" ? response.data.raw : "") ||
-          `HTTP ${response.status}`,
-      );
+        response.data?.message ||
+        (typeof response.data?.raw === "string" ? response.data.raw : "") ||
+        `HTTP ${response.status}`;
+      const err: any = new Error(message);
+      err.data = response.data;
+      err.status = response.status;
+      throw err;
+    }
     return { data: response.data };
   },
 
