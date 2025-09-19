@@ -56,7 +56,7 @@ function OLXStyleCategories() {
   const [loading, setLoading] = useState(true);
   const [activeCat, setActiveCat] = useState<Category | null>(null);
   const [activeSubcats, setActiveSubcats] = useState<any[]>([]);
-  const navigate = (window as any).navigate || null;
+  const navigate = useNavigate();
 
   // Default categories similar to OLX
   const defaultCategories = [
