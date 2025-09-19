@@ -700,11 +700,15 @@ export const googleAuth: RequestHandler = async (req, res) => {
 
       if (info) {
         const issOk =
-          projectId && info.iss === `https://securetoken.google.com/${projectId}`;
+          projectId &&
+          info.iss === `https://securetoken.google.com/${projectId}`;
         const audOk = projectId && info.aud === projectId; // Firebase ID token path
         const expOk = Number(info.exp || 0) * 1000 > Date.now();
 
-        if ((issOk && expOk && audOk) || (process.env.NODE_ENV !== "production" && info.email)) {
+        if (
+          (issOk && expOk && audOk) ||
+          (process.env.NODE_ENV !== "production" && info.email)
+        ) {
           decoded = { email: info.email, name: info.name || "", uid: info.sub };
           console.log("tokeninfo accepted for:", decoded.email);
         }
@@ -732,10 +736,16 @@ export const googleAuth: RequestHandler = async (req, res) => {
               };
               console.log("accounts:lookup accepted for:", decoded.email);
             } else if (process.env.NODE_ENV !== "production") {
-              console.warn("accounts:lookup returned no user; allowing in dev if email present in token payload");
+              console.warn(
+                "accounts:lookup returned no user; allowing in dev if email present in token payload",
+              );
             }
           } else {
-            console.warn("accounts:lookup failed:", resp2.status, await resp2.text());
+            console.warn(
+              "accounts:lookup failed:",
+              resp2.status,
+              await resp2.text(),
+            );
           }
         } catch (err2: any) {
           console.warn("accounts:lookup error:", err2?.message || err2);
