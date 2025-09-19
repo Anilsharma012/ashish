@@ -166,8 +166,10 @@ const ComprehensiveAuth = () => {
         error,
       );
 
-      // Handle specific error types
-      let errorMessage = error.message;
+      // Prefer server-provided message when available on our api wrapper
+      let errorMessage =
+        error?.data?.error || error?.data?.message || error.message;
+
       if (
         error.name === "TypeError" &&
         error.message.includes("Failed to fetch")
