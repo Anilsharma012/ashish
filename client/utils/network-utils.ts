@@ -22,14 +22,21 @@ export async function safeFetch(
   options: FetchOptions = {},
 ): Promise<Response> {
   const {
-    timeout = 5000,
+    timeout = 10000,
     retries = 0,
     retryDelay = 1000,
     ...fetchOptions
   } = options;
 
+  // Compose timeout signal with any external signal
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  const externalSignal = (fetchOptions as any).signal as AbortSignal | undefined;
+  const onExternalAbort = () => controller.abort(externalSignal?.reason || "external-abort");
+  if (externalSignal) {
+    if (externalSignal.aborted) controller.abort(externalSignal.reason || "external-abort");
+    else externalSignal.addEventListener("abort", onExternalAbort);
+  }
+  const timeoutId = setTimeout(() => controller.abort("timeout"), timeout);
 
   try {
     const response = await fetch(url, {
@@ -43,14 +50,17 @@ export async function safeFetch(
     });
 
     clearTimeout(timeoutId);
+    if (externalSignal) externalSignal.removeEventListener("abort", onExternalAbort);
     return response;
   } catch (error: any) {
     clearTimeout(timeoutId);
+    if (externalSignal) externalSignal.removeEventListener("abort", onExternalAbort);
 
     // Handle different types of errors
     if (error.name === "AbortError") {
+      const reason = (error as any)?.cause || (controller as any)?.signal?.reason || "timeout";
       throw new NetworkError(
-        `Request timeout after ${timeout}ms`,
+        `Request aborted (${String(reason)}) after ${timeout}ms`,
         "TIMEOUT",
         true,
       );
