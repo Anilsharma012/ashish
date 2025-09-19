@@ -27,13 +27,15 @@ export default function Lease() {
     try {
       setLoading(true);
       const apiResponse = await (window as any).api(
-        "/subcategories?category=lease",
+        "/categories/lease/subcategories",
       );
       const data = apiResponse?.json || {};
 
       if (apiResponse?.ok && data?.success && Array.isArray(data.data)) {
         setSubcategories(data.data);
         return;
+      } else {
+        console.warn("Subcategories API non-OK; using fallback", apiResponse?.status, data?.error);
       }
     } catch (error) {
       console.warn("Subcategories API failed, using fallback:", error);
