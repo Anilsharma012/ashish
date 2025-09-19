@@ -168,7 +168,7 @@ export default function EnhancedSellerDashboard() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login");
+      navigate("/auth", { replace: true });
       return;
     }
 
@@ -185,7 +185,7 @@ export default function EnhancedSellerDashboard() {
       setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
-        navigate("/login");
+        navigate("/auth", { replace: true });
         return;
       }
 
@@ -205,28 +205,32 @@ export default function EnhancedSellerDashboard() {
       ]);
 
       // Handle properties
-      if (propertiesRes.data.success) {
+      if (propertiesRes && propertiesRes.data && propertiesRes.data.success) {
         setProperties(propertiesRes.data.data);
         calculateStats(propertiesRes.data.data);
       }
 
       // Handle notifications
-      if (notificationsRes.data.success) {
+      if (
+        notificationsRes &&
+        notificationsRes.data &&
+        notificationsRes.data.success
+      ) {
         setNotifications(notificationsRes.data.data);
       }
 
       // Handle messages
-      if (messagesRes.data.success) {
+      if (messagesRes && messagesRes.data && messagesRes.data.success) {
         setMessages(messagesRes.data.data);
       }
 
       // Handle packages
-      if (packagesRes.data.success) {
+      if (packagesRes && packagesRes.data && packagesRes.data.success) {
         setPackages(packagesRes.data.data);
       }
 
       // Handle payments
-      if (paymentsRes.data.success) {
+      if (paymentsRes && paymentsRes.data && paymentsRes.data.success) {
         setPayments(paymentsRes.data.data);
       }
     } catch (error: any) {

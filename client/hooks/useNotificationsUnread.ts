@@ -10,15 +10,14 @@ export const useNotificationsUnread = () => {
         const token =
           localStorage.getItem("token") || localStorage.getItem("auth_token");
         if (!token) return;
-        const res = await fetch("/api/notifications/unread-count", {
-          headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (active) setCount(Number(data?.data?.unread || 0));
+        const res = await (
+          await import("@/lib/api")
+        ).api.get("notifications/unread-count", token);
+        if (!res || !res.data || !res.data.data) return;
+        if (active) setCount(Number(res.data.data.unread || 0));
       } catch (e) {
         // Swallow errors to avoid UI noise
+        console.warn("notifications unread fetch failed:", e?.message || e);
       }
     };
 

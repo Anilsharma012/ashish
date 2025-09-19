@@ -373,15 +373,23 @@ export const api = {
     const headers: Record<string, string> = authToken
       ? { Authorization: `Bearer ${authToken}` }
       : {};
-    const response = await apiRequest(endpoint, { method: "GET", headers });
-    if (!response.ok)
-      throw new Error(
-        response.data?.error ||
-          response.data?.message ||
-          (typeof response.data?.raw === "string" ? response.data.raw : "") ||
-          `HTTP ${response.status}`,
-      );
-    return { data: response.data };
+
+    try {
+      const response = await apiRequest(endpoint, { method: "GET", headers });
+      if (!response.ok) {
+        throw new Error(
+          response.data?.error ||
+            response.data?.message ||
+            (typeof response.data?.raw === "string" ? response.data.raw : "") ||
+            `HTTP ${response.status}`,
+        );
+      }
+      return { data: response.data };
+    } catch (err: any) {
+      // On network errors, don't throw to avoid uncaught exceptions in UI polling hooks.
+      console.warn(`api.get(${endpoint}) failed:`, err?.message || err);
+      return { data: null };
+    }
   },
 
   post: async (endpoint: string, data?: any, token?: string) => {

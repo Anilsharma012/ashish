@@ -300,22 +300,6 @@ export const signInWithGoogle = async (): Promise<{
     console.error("Google authentication failed:", error);
     const authError = error as AuthError;
 
-    // Fallback to redirect when popup/cookies/domains cause issues
-    if (
-      authError.code === "auth/popup-blocked" ||
-      authError.code === "auth/operation-not-supported-in-this-environment" ||
-      authError.code === "auth/network-request-failed" ||
-      authError.code === "auth/unauthorized-domain"
-    ) {
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        // Redirecting; return a pending promise to avoid further handling
-        return new Promise(() => {}) as any;
-      } catch (e) {
-        // fallthrough to error mapping below
-      }
-    }
-
     let message = "Google authentication failed";
     switch (authError.code) {
       case "auth/popup-closed-by-user":
