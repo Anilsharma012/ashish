@@ -132,6 +132,7 @@ export default function Properties() {
                 <div className="flex">
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <img
+                      data-wm="1"
                       src={
                         property.images[0] ||
                         "https://via.placeholder.com/300x300?text=No+Image"
