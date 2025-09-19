@@ -53,6 +53,8 @@ function OLXStyleCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [sliders, setSliders] = useState<HomepageSlider[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCat, setActiveCat] = useState<Category | null>(null);
+  const [activeSubcats, setActiveSubcats] = useState<any[]>([]);
 
   // Default categories similar to OLX
   const defaultCategories = [
