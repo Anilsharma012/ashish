@@ -89,10 +89,19 @@ export default function GoogleAuth({
           </Alert>
         )}
 
+        {!isFirebaseConfigured && (
+          <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-yellow-800">
+              Google Sign-In is unavailable. Admin: configure Firebase env (VITE_FIREBASE_*) to enable it. Use phone/email login for now.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Button
           onClick={handleGoogleLogin}
           className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400"
-          disabled={loading}
+          disabled={loading || disabled}
           size="lg"
         >
           {loading ? (
