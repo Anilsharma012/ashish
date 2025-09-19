@@ -552,6 +552,7 @@ export default function MyProperties() {
                             <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
                               {property.images && property.images.length > 0 ? (
                                 <img
+                                  data-wm="1"
                                   src={property.images[0]}
                                   alt={property.title}
                                   className="w-full h-full object-cover"
@@ -764,6 +765,7 @@ export default function MyProperties() {
                     {selectedProperty.images &&
                     selectedProperty.images.length > 0 ? (
                       <img
+                        data-wm="1"
                         src={selectedProperty.images[0]}
                         alt={selectedProperty.title}
                         className="w-full h-full object-cover"
