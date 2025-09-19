@@ -60,14 +60,14 @@ function OLXStyleCategories() {
   const defaultCategories = [
     { name: "Cars", slug: "cars", icon: "🚗" },
     { name: "Properties", slug: "properties", icon: "🏢" },
-    { name: "Mobiles", slug: "mobiles", icon: "��" },
+    { name: "Mobiles", slug: "mobiles", icon: "📱" },
     { name: "Jobs", slug: "jobs", icon: "💼" },
     { name: "Fashion", slug: "fashion", icon: "👕" },
+    { name: "Other Services", slug: "other-services", icon: "🛠️" },
     { name: "Bikes", slug: "bikes", icon: "🏍️" },
     { name: "Electronics & Appliances", slug: "electronics", icon: "📺" },
     { name: "Commercial Vehicles & Spares", slug: "commercial", icon: "🚚" },
     { name: "Furniture", slug: "furniture", icon: "🛋️" },
-    { name: "Pets", slug: "pets", icon: "🐕" },
   ];
 
   useEffect(() => {
