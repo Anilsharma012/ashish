@@ -126,39 +126,26 @@ function OLXStyleCategories() {
 
   const handleCategoryClick = async (category: Category) => {
     try {
-      // Special handling: Other Services should navigate to its own flow
-      if (
-        category.slug === "other-services" ||
-        /other\s*services?/i.test(category.name || "")
-      ) {
-        window.location.href = "/other-services";
+      const slug = (category.slug || "").toLowerCase();
+      const name = (category.name || "").toLowerCase();
+
+      // Other Services -> dedicated flow
+      if (slug === "other-services" || /other\s*services?/.test(name)) {
+        navigate("/other-services");
         return;
       }
 
-      // Toggle if same category
-      if (activeCat && activeCat.slug === category.slug) {
-        setActiveCat(null);
-        setActiveSubcats([]);
+      // Property categories -> dedicated pages that fetch admin subcategories
+      const propertyPages = new Set(["buy", "sale", "rent", "lease", "pg"]);
+      if (propertyPages.has(slug)) {
+        navigate(`/${slug}`);
         return;
       }
-      setActiveCat(category);
 
-      // Prefer embedded subcategories from admin API
-      if (Array.isArray(category.subcategories) && category.subcategories.length)
-        return setActiveSubcats(category.subcategories);
-
-      // Fallback: fetch subcategories by slug from admin via global API
-      const apiRes = await (window as any).api(
-        `/categories/${category.slug}/subcategories`,
-      );
-      if (apiRes && apiRes.ok && apiRes.json?.success && Array.isArray(apiRes.json.data)) {
-        setActiveSubcats(apiRes.json.data);
-        return;
-      }
-      setActiveSubcats([]);
+      // Fallback: generic category page
+      navigate(`/categories/${slug || name.replace(/[^a-z0-9]+/g, "-")}`);
     } catch (e) {
-      console.warn("Failed to load subcategories:", (e as any)?.message || e);
-      setActiveSubcats([]);
+      console.warn("Category navigation failed:", (e as any)?.message || e);
     }
   };
 
