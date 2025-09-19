@@ -680,8 +680,8 @@ export default function RecentViews() {
                         <div className="w-32 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
                           {property.images && property.images.length > 0 ? (
                             <img
-                            data-wm="1"
-                            src={property.images[0]}
+                              data-wm="1"
+                              src={property.images[0]}
                               alt={property.title}
                               className="w-full h-full object-cover"
                             />

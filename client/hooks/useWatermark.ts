@@ -30,7 +30,8 @@ export function useWatermark() {
       return false;
     };
 
-    const alreadyProcessed = (img: HTMLImageElement) => img.dataset.wmProcessed === "1";
+    const alreadyProcessed = (img: HTMLImageElement) =>
+      img.dataset.wmProcessed === "1";
     const markProcessed = (img: HTMLImageElement) => {
       img.dataset.wmProcessed = "1";
     };
@@ -187,7 +188,8 @@ export function useWatermark() {
       const dispW = Math.max(1, rect.width || img.width);
       const dispH = Math.max(1, rect.height || img.height);
 
-      if (getComputedStyle(host).position === "static") host.style.position = "relative";
+      if (getComputedStyle(host).position === "static")
+        host.style.position = "relative";
 
       const overlay = document.createElement("div");
       overlay.setAttribute("data-wm-overlay", "1");
@@ -250,7 +252,9 @@ export function useWatermark() {
     );
 
     const observeExisting = () => {
-      const nodes = document.querySelectorAll<HTMLImageElement>(selectors.join(","));
+      const nodes = document.querySelectorAll<HTMLImageElement>(
+        selectors.join(","),
+      );
       nodes.forEach((img) => {
         if (!alreadyProcessed(img) && !exclude(img)) io.observe(img);
       });
@@ -263,13 +267,19 @@ export function useWatermark() {
             if (n instanceof HTMLImageElement) {
               if (!alreadyProcessed(n) && !exclude(n)) io.observe(n);
             } else if (n instanceof HTMLElement) {
-              const imgs = n.querySelectorAll<HTMLImageElement>(selectors.join(","));
+              const imgs = n.querySelectorAll<HTMLImageElement>(
+                selectors.join(","),
+              );
               imgs.forEach((img) => {
                 if (!alreadyProcessed(img) && !exclude(img)) io.observe(img);
               });
             }
           });
-        } else if (m.type === "attributes" && m.target instanceof HTMLImageElement && m.attributeName === "src") {
+        } else if (
+          m.type === "attributes" &&
+          m.target instanceof HTMLImageElement &&
+          m.attributeName === "src"
+        ) {
           const img = m.target as HTMLImageElement;
           img.dataset.wmProcessed = ""; // reset so it can reprocess on new src
           if (!exclude(img)) io.observe(img);
@@ -278,7 +288,12 @@ export function useWatermark() {
     });
 
     observeExisting();
-    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+    mo.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src"],
+    });
 
     return () => {
       try {
@@ -287,7 +302,9 @@ export function useWatermark() {
       try {
         mo.disconnect();
       } catch {}
-      document.querySelectorAll<HTMLElement>("[data-wm-overlay='1']").forEach((el) => el.remove());
+      document
+        .querySelectorAll<HTMLElement>("[data-wm-overlay='1']")
+        .forEach((el) => el.remove());
     };
   }, []);
 }
