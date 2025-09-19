@@ -141,7 +141,11 @@ function api(p: string, o: any = {}) {
     } catch (error: any) {
       // Try XHR fallback
       try {
-        console.warn("⚠️ fetch failed, attempting XHR fallback:", url, error?.message || error);
+        console.warn(
+          "⚠️ fetch failed, attempting XHR fallback:",
+          url,
+          error?.message || error,
+        );
         const res = await xhrFallback();
         clearTimeout(timeoutId);
         return {
@@ -156,15 +160,21 @@ function api(p: string, o: any = {}) {
         // Map to timeout/network errors where appropriate
         if (
           error?.name === "AbortError" ||
-          String(error?.message || "").toLowerCase().includes("aborted") ||
-          String(xhrError?.message || "").toLowerCase().includes("timeout")
+          String(error?.message || "")
+            .toLowerCase()
+            .includes("aborted") ||
+          String(xhrError?.message || "")
+            .toLowerCase()
+            .includes("timeout")
         ) {
           const timeoutError = new Error(`Request timeout: ${url}`);
           timeoutError.name = "TimeoutError";
           throw timeoutError;
         }
 
-        const networkError = new Error(`Network error: Cannot connect to server at ${url}`);
+        const networkError = new Error(
+          `Network error: Cannot connect to server at ${url}`,
+        );
         networkError.name = "NetworkError";
         (networkError as any).cause = { fetchError: error, xhrError };
         throw networkError;

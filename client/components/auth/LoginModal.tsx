@@ -26,7 +26,7 @@ export default function LoginModal() {
 
   // Immediately redirect to unified auth page to avoid modal usage across site
   useEffect(() => {
-    navigate('/auth', { replace: true });
+    navigate("/auth", { replace: true });
   }, [navigate]);
 
   // Shared

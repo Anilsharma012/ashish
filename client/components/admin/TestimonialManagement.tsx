@@ -27,12 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Dialog,
   DialogContent,
@@ -62,7 +57,8 @@ export default function TestimonialManagement() {
   const [error, setError] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
+  const [selectedTestimonial, setSelectedTestimonial] =
+    useState<Testimonial | null>(null);
 
   useEffect(() => {
     fetchTestimonials();
@@ -97,7 +93,11 @@ export default function TestimonialManagement() {
     }
   };
 
-  const updateTestimonialStatus = async (testimonialId: string, status: string, featured?: boolean) => {
+  const updateTestimonialStatus = async (
+    testimonialId: string,
+    status: string,
+    featured?: boolean,
+  ) => {
     if (!token) return;
 
     try {
@@ -111,11 +111,17 @@ export default function TestimonialManagement() {
       });
 
       if (response.ok) {
-        setTestimonials(testimonials.map(t => 
-          t._id === testimonialId 
-            ? { ...t, status: status as any, featured: featured ?? t.featured }
-            : t
-        ));
+        setTestimonials(
+          testimonials.map((t) =>
+            t._id === testimonialId
+              ? {
+                  ...t,
+                  status: status as any,
+                  featured: featured ?? t.featured,
+                }
+              : t,
+          ),
+        );
       } else {
         const data = await response.json();
         setError(data.error || "Failed to update testimonial");
@@ -127,7 +133,8 @@ export default function TestimonialManagement() {
   };
 
   const deleteTestimonial = async (testimonialId: string) => {
-    if (!token || !confirm("Are you sure you want to delete this testimonial?")) return;
+    if (!token || !confirm("Are you sure you want to delete this testimonial?"))
+      return;
 
     try {
       const response = await fetch(`/api/admin/testimonials/${testimonialId}`, {
@@ -136,7 +143,7 @@ export default function TestimonialManagement() {
       });
 
       if (response.ok) {
-        setTestimonials(testimonials.filter(t => t._id !== testimonialId));
+        setTestimonials(testimonials.filter((t) => t._id !== testimonialId));
       } else {
         const data = await response.json();
         setError(data.error || "Failed to delete testimonial");
@@ -159,7 +166,8 @@ export default function TestimonialManagement() {
       comment.toLowerCase().includes(q) ||
       (testimonial.email || "").toString().toLowerCase().includes(q);
 
-    const matchesStatus = selectedStatus === "all" || testimonial.status === selectedStatus;
+    const matchesStatus =
+      selectedStatus === "all" || testimonial.status === selectedStatus;
 
     return matchesSearch && matchesStatus;
   });
@@ -171,9 +179,7 @@ export default function TestimonialManagement() {
           <Star
             key={star}
             className={`h-4 w-4 ${
-              star <= rating
-                ? "text-yellow-400 fill-current"
-                : "text-gray-300"
+              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
             }`}
           />
         ))}
@@ -212,8 +218,12 @@ export default function TestimonialManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Testimonial Management</h3>
-          <p className="text-gray-600">Manage customer testimonials and reviews</p>
+          <h3 className="text-2xl font-bold text-gray-900">
+            Testimonial Management
+          </h3>
+          <p className="text-gray-600">
+            Manage customer testimonials and reviews
+          </p>
         </div>
       </div>
 
@@ -221,7 +231,9 @@ export default function TestimonialManagement() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Testimonials</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Testimonials
+            </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -231,12 +243,14 @@ export default function TestimonialManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Reviews
+            </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {testimonials.filter(t => t.status === "pending").length}
+              {testimonials.filter((t) => t.status === "pending").length}
             </div>
             <p className="text-xs text-muted-foreground">Awaiting approval</p>
           </CardContent>
@@ -248,7 +262,7 @@ export default function TestimonialManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {testimonials.filter(t => t.status === "approved").length}
+              {testimonials.filter((t) => t.status === "approved").length}
             </div>
             <p className="text-xs text-muted-foreground">Live testimonials</p>
           </CardContent>
@@ -260,7 +274,7 @@ export default function TestimonialManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {testimonials.filter(t => t.featured).length}
+              {testimonials.filter((t) => t.featured).length}
             </div>
             <p className="text-xs text-muted-foreground">Featured reviews</p>
           </CardContent>
@@ -313,12 +327,12 @@ export default function TestimonialManagement() {
                   <TableCell className="font-medium">
                     <div>
                       <p className="font-semibold">{testimonial.name}</p>
-                      <p className="text-sm text-gray-500">{testimonial.email}</p>
+                      <p className="text-sm text-gray-500">
+                        {testimonial.email}
+                      </p>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    {renderStars(testimonial.rating)}
-                  </TableCell>
+                  <TableCell>{renderStars(testimonial.rating)}</TableCell>
                   <TableCell>
                     <div className="max-w-xs truncate">
                       {testimonial.comment.length > 50
@@ -369,15 +383,21 @@ export default function TestimonialManagement() {
                           {selectedTestimonial && (
                             <div className="space-y-4">
                               <div>
-                                <label className="font-semibold">Customer:</label>
+                                <label className="font-semibold">
+                                  Customer:
+                                </label>
                                 <p>{selectedTestimonial.name}</p>
                               </div>
                               <div>
                                 <label className="font-semibold">Rating:</label>
-                                <div className="mt-1">{renderStars(selectedTestimonial.rating)}</div>
+                                <div className="mt-1">
+                                  {renderStars(selectedTestimonial.rating)}
+                                </div>
                               </div>
                               <div>
-                                <label className="font-semibold">Comment:</label>
+                                <label className="font-semibold">
+                                  Comment:
+                                </label>
                                 <p className="mt-1 p-3 bg-gray-50 rounded-lg">
                                   {selectedTestimonial.comment}
                                 </p>
@@ -387,7 +407,10 @@ export default function TestimonialManagement() {
                                   size="sm"
                                   className="bg-green-600 hover:bg-green-700"
                                   onClick={() => {
-                                    updateTestimonialStatus(selectedTestimonial._id, "approved");
+                                    updateTestimonialStatus(
+                                      selectedTestimonial._id,
+                                      "approved",
+                                    );
                                     setSelectedTestimonial(null);
                                   }}
                                 >
@@ -398,7 +421,10 @@ export default function TestimonialManagement() {
                                   variant="outline"
                                   className="text-red-600"
                                   onClick={() => {
-                                    updateTestimonialStatus(selectedTestimonial._id, "rejected");
+                                    updateTestimonialStatus(
+                                      selectedTestimonial._id,
+                                      "rejected",
+                                    );
                                     setSelectedTestimonial(null);
                                   }}
                                 >
@@ -412,12 +438,14 @@ export default function TestimonialManagement() {
                                     updateTestimonialStatus(
                                       selectedTestimonial._id,
                                       selectedTestimonial.status,
-                                      !selectedTestimonial.featured
+                                      !selectedTestimonial.featured,
                                     );
                                     setSelectedTestimonial(null);
                                   }}
                                 >
-                                  {selectedTestimonial.featured ? "Unfeature" : "Feature"}
+                                  {selectedTestimonial.featured
+                                    ? "Unfeature"
+                                    : "Feature"}
                                 </Button>
                               </div>
                             </div>
@@ -430,7 +458,12 @@ export default function TestimonialManagement() {
                             size="sm"
                             variant="outline"
                             className="text-green-600"
-                            onClick={() => updateTestimonialStatus(testimonial._id, "approved")}
+                            onClick={() =>
+                              updateTestimonialStatus(
+                                testimonial._id,
+                                "approved",
+                              )
+                            }
                           >
                             <Check className="h-4 w-4" />
                           </Button>
@@ -438,7 +471,12 @@ export default function TestimonialManagement() {
                             size="sm"
                             variant="outline"
                             className="text-red-600"
-                            onClick={() => updateTestimonialStatus(testimonial._id, "rejected")}
+                            onClick={() =>
+                              updateTestimonialStatus(
+                                testimonial._id,
+                                "rejected",
+                              )
+                            }
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -450,7 +488,10 @@ export default function TestimonialManagement() {
               ))}
               {filteredTestimonials.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-gray-500 py-8">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-gray-500 py-8"
+                  >
                     No testimonials found
                   </TableCell>
                 </TableRow>

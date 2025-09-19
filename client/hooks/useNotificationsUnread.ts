@@ -10,7 +10,9 @@ export const useNotificationsUnread = () => {
         const token =
           localStorage.getItem("token") || localStorage.getItem("auth_token");
         if (!token) return;
-        const res = await (await import("@/lib/api")).api.get("notifications/unread-count", token);
+        const res = await (
+          await import("@/lib/api")
+        ).api.get("notifications/unread-count", token);
         if (!res || !res.data || !res.data.data) return;
         if (active) setCount(Number(res.data.data.unread || 0));
       } catch (e) {

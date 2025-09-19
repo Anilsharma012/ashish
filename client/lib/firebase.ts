@@ -300,7 +300,6 @@ export const signInWithGoogle = async (): Promise<{
     console.error("Google authentication failed:", error);
     const authError = error as AuthError;
 
-
     let message = "Google authentication failed";
     switch (authError.code) {
       case "auth/popup-closed-by-user":

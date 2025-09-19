@@ -211,7 +211,11 @@ export default function EnhancedSellerDashboard() {
       }
 
       // Handle notifications
-      if (notificationsRes && notificationsRes.data && notificationsRes.data.success) {
+      if (
+        notificationsRes &&
+        notificationsRes.data &&
+        notificationsRes.data.success
+      ) {
         setNotifications(notificationsRes.data.data);
       }
 
