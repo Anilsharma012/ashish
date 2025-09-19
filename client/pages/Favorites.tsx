@@ -95,6 +95,7 @@ interface SavedSearch {
 
 export default function Favorites() {
   const { user } = useAuth();
+  useWatermark();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<FavoriteProperty[]>([]);
