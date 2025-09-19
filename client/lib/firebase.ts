@@ -7,6 +7,8 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -57,8 +59,21 @@ let app: any = null;
 let analytics: any = undefined;
 if (isConfigured) {
   app = initializeApp(firebaseConfig);
-  if (typeof window !== "undefined") {
-    analytics = getAnalytics(app);
+  // Initialize Analytics only when measurementId is present and in browser
+  if (
+    typeof window !== "undefined" &&
+    Boolean(firebaseConfig.measurementId) &&
+    import.meta.env.MODE === "production"
+  ) {
+    try {
+      analytics = getAnalytics(app);
+    } catch (e) {
+      // Avoid crashing on analytics/installation registration issues in dev
+      console.warn(
+        "Analytics initialization skipped:",
+        (e as any)?.message || e,
+      );
+    }
   }
 } else {
   console.warn(
@@ -247,13 +262,31 @@ export const signInWithGoogle = async (): Promise<{
 }> => {
   try {
     if (!auth) throw new Error("Firebase not configured");
-    const result = await signInWithPopup(auth, googleProvider); // Chrome popup
+
+    // First, handle redirect result if present (for environments where popups are blocked)
+    try {
+      const redirectRes = await getRedirectResult(auth);
+      if (redirectRes && redirectRes.user) {
+        const u = redirectRes.user;
+        const idToken = await u.getIdToken(true);
+        return {
+          idToken,
+          profile: {
+            uid: u.uid,
+            email: u.email,
+            name: u.displayName,
+            photoURL: u.photoURL,
+          },
+        };
+      }
+    } catch {}
+
+    // Try popup normally
+    const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    // >>> yahi important hai: backend verify ke liye Firebase ID token
     const idToken = await user.getIdToken(true);
 
-    console.log("Google authentication successful");
     return {
       idToken,
       profile: {
@@ -266,6 +299,22 @@ export const signInWithGoogle = async (): Promise<{
   } catch (error) {
     console.error("Google authentication failed:", error);
     const authError = error as AuthError;
+
+    // Fallback to redirect when popup/cookies/domains cause issues
+    if (
+      authError.code === "auth/popup-blocked" ||
+      authError.code === "auth/operation-not-supported-in-this-environment" ||
+      authError.code === "auth/network-request-failed" ||
+      authError.code === "auth/unauthorized-domain"
+    ) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        // Redirecting; return a pending promise to avoid further handling
+        return new Promise(() => {}) as any;
+      } catch (e) {
+        // fallthrough to error mapping below
+      }
+    }
 
     let message = "Google authentication failed";
     switch (authError.code) {
@@ -284,6 +333,10 @@ export const signInWithGoogle = async (): Promise<{
         break;
       case "auth/unauthorized-domain":
         message = "This domain is not authorized for Google authentication";
+        break;
+      case "auth/network-request-failed":
+        message =
+          "Network error. Add this preview domain to Firebase > Authentication > Settings > Authorized domains, then retry.";
         break;
       default:
         message = authError.message || "Google authentication failed";

@@ -7,7 +7,8 @@ import BottomNavigation from "../components/BottomNavigation";
 import StaticFooter from "../components/StaticFooter";
 
 interface Subcategory {
-  id: string;
+  id?: string;
+  _id?: string;
   name: string;
   slug: string;
   description: string;
@@ -27,13 +28,19 @@ export default function Lease() {
     try {
       setLoading(true);
       const apiResponse = await (window as any).api(
-        "/subcategories?category=lease",
+        "/categories/lease/subcategories",
       );
       const data = apiResponse?.json || {};
 
       if (apiResponse?.ok && data?.success && Array.isArray(data.data)) {
         setSubcategories(data.data);
         return;
+      } else {
+        console.warn(
+          "Subcategories API non-OK; using fallback",
+          apiResponse?.status,
+          data?.error,
+        );
       }
     } catch (error) {
       console.warn("Subcategories API failed, using fallback:", error);
@@ -41,12 +48,48 @@ export default function Lease() {
       // Fallback demo data (always ensure UI has content)
       if (!Array.isArray(subcategories) || subcategories.length === 0) {
         setSubcategories([
-          { id: "office", name: "Office Space", slug: "office", description: "Commercial office space", count: 35 },
-          { id: "retail", name: "Retail Space", slug: "retail", description: "Shops and showrooms", count: 28 },
-          { id: "warehouse", name: "Warehouse", slug: "warehouse", description: "Storage and warehouse", count: 12 },
-          { id: "industrial", name: "Industrial", slug: "industrial", description: "Industrial properties", count: 8 },
-          { id: "restaurant", name: "Restaurant Space", slug: "restaurant", description: "Restaurant and food space", count: 15 },
-          { id: "hotel", name: "Hotel/Lodge", slug: "hotel", description: "Hospitality properties", count: 6 },
+          {
+            id: "office",
+            name: "Office Space",
+            slug: "office",
+            description: "Commercial office space",
+            count: 35,
+          },
+          {
+            id: "retail",
+            name: "Retail Space",
+            slug: "retail",
+            description: "Shops and showrooms",
+            count: 28,
+          },
+          {
+            id: "warehouse",
+            name: "Warehouse",
+            slug: "warehouse",
+            description: "Storage and warehouse",
+            count: 12,
+          },
+          {
+            id: "industrial",
+            name: "Industrial",
+            slug: "industrial",
+            description: "Industrial properties",
+            count: 8,
+          },
+          {
+            id: "restaurant",
+            name: "Restaurant Space",
+            slug: "restaurant",
+            description: "Restaurant and food space",
+            count: 15,
+          },
+          {
+            id: "hotel",
+            name: "Hotel/Lodge",
+            slug: "hotel",
+            description: "Hospitality properties",
+            count: 6,
+          },
         ]);
       }
       setLoading(false);
@@ -90,7 +133,7 @@ export default function Lease() {
           <div className="grid grid-cols-2 gap-3">
             {subcategories.map((subcategory) => (
               <button
-                key={subcategory.id}
+                key={subcategory._id || subcategory.id || subcategory.slug}
                 onClick={() => handleSubcategoryClick(subcategory)}
                 className="subcat-card bg-white border border-gray-200 rounded-lg p-4 text-left hover:bg-gray-50 transition-colors shadow-sm"
                 data-testid="subcat-card"

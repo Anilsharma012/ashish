@@ -105,9 +105,20 @@ export default function OtherServices() {
                   className="h-full transition-all duration-200 hover:shadow-lg hover:scale-105 hover:border-[#C70000] bg-white"
                 >
                   <CardContent className="p-6 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#C70000] to-[#A60000] rounded-full mb-4 group-hover:scale-110 transition-transform duration-200">
-                      <Wrench className="h-8 w-8 text-white" />
-                    </div>
+                    {Boolean((category as any).image) ? (
+                      <div className="mb-4">
+                        <img
+                          src={(category as any).image}
+                          alt={category.name}
+                          className="w-20 h-20 rounded-full object-cover mx-auto border"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-[#C70000] to-[#A60000] rounded-full mb-4 group-hover:scale-110 transition-transform duration-200">
+                        <Wrench className="h-8 w-8 text-white" />
+                      </div>
+                    )}
                     <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-[#C70000] transition-colors">
                       {category.name}
                     </h3>

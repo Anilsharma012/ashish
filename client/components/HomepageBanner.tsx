@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { BannerAd } from "@shared/types";
-import { safeFetch } from "../utils/network-utils";
 
 interface HomepageBannerProps {
   position: "homepage_top" | "homepage_middle" | "homepage_bottom";
@@ -33,40 +32,27 @@ export default function HomepageBanner({
     try {
       console.log(`🏷️ Fetching banners for position: ${position}`);
 
-      const response = await safeFetch(`/api/banners?active=true`, { timeout: 8000 });
-
-      console.log("📡 Banners response:", {
-        status: response.status,
-        ok: response.ok,
-        url: response.url,
+      const apiRes = await (window as any).api("/banners?active=true", {
+        timeout: 8000,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("📊 Banners data:", data);
-
-        if (data.success && Array.isArray(data.data)) {
-          setBanners(data.data);
-        } else {
-          console.log("⚠️ No banner data or invalid format");
-          setBanners([]);
-        }
+      if (
+        apiRes &&
+        apiRes.ok &&
+        apiRes.json?.success &&
+        Array.isArray(apiRes.json.data)
+      ) {
+        setBanners(apiRes.json.data);
       } else {
-        console.log(`⚠️ Banners request failed: ${response.status}`);
+        console.log("⚠️ Banners request not OK or empty", {
+          status: apiRes?.status,
+          ok: apiRes?.ok,
+          err: apiRes?.json?.error,
+        });
+        setBanners([]);
       }
     } catch (error: any) {
-      // Normalize error logging to avoid [object Object]
-      const errMsg = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-      console.error(`Error fetching banners (${position}): ${errMsg}`);
-
-      // Provide appropriate logging based on error type
-      if (error?.name === "AbortError") {
-        console.log("🔄 Banners request timed out");
-      } else if (error?.message?.includes("Failed to fetch")) {
-        console.log("🌐 Network connectivity issue for banners");
-      }
-
-      // Set empty banners array - component will handle no banners gracefully
+      const errMsg = error?.message || String(error);
+      console.warn(`Error fetching banners (${position}):`, errMsg);
       setBanners([]);
     } finally {
       setLoading(false);

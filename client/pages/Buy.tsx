@@ -7,7 +7,8 @@ import BottomNavigation from "../components/BottomNavigation";
 import StaticFooter from "../components/StaticFooter";
 
 interface Subcategory {
-  id: string;
+  id?: string;
+  _id?: string;
   name: string;
   slug: string;
   description: string;
@@ -26,20 +27,19 @@ export default function Buy() {
   const fetchSubcategories = async () => {
     try {
       setLoading(true);
-      // STEP 4 requirement: await api(`/subcategories?category=buy&approved=true`)
+      // Prefer new public endpoint backed by admin data
       const apiResponse = await (window as any).api(
-        "/subcategories?category=buy&approved=true",
+        "/categories/buy/subcategories",
       );
 
-      if (apiResponse.ok) {
-        const data = apiResponse.json;
-        if (data.success) {
-          setSubcategories(data.data);
-        } else {
-          throw new Error(data.error || "Failed to fetch subcategories");
-        }
+      if (apiResponse.ok && apiResponse.json?.success) {
+        setSubcategories(apiResponse.json.data || []);
       } else {
-        throw new Error(`HTTP error! status: ${apiResponse.status}`);
+        console.warn(
+          "Subcategories API returned non-OK; falling back",
+          apiResponse.status,
+          apiResponse.json?.error,
+        );
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
@@ -147,7 +147,7 @@ export default function Buy() {
           <div className="grid grid-cols-2 gap-3">
             {subcategories.map((subcategory) => (
               <button
-                key={subcategory.id}
+                key={subcategory._id || subcategory.id || subcategory.slug}
                 onClick={() => handleSubcategoryClick(subcategory)}
                 className="subcat-card bg-white border border-gray-200 rounded-lg p-4 text-left hover:bg-gray-50 transition-colors shadow-sm"
                 data-testid="subcat-card"

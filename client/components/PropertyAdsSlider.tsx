@@ -7,7 +7,7 @@ import {
   Bed,
   Bath,
 } from "lucide-react";
-import { safeFetch, NetworkError } from "../utils/network-utils";
+// Use global API helper that falls back to XHR when fetch is instrumented
 
 interface Advertisement {
   _id: string;
@@ -74,16 +74,17 @@ const PropertyAdsSlider: React.FC = () => {
 
         // Try to fetch advertisements first (using banners with home position)
         try {
-          const adsResponse = await safeFetch("/api/banners?active=true", { timeout: 5000 });
-
-          if (adsResponse.ok) {
-            const adsData = await adsResponse.json();
-            if (
-              adsData.success &&
-              adsData.data &&
-              Array.isArray(adsData.data)
-            ) {
-              const mappedAds: Advertisement[] = adsData.data.map((b: any) => ({
+          const adsRes = await (window as any).api("/banners?active=true", {
+            timeout: 7000,
+          });
+          if (
+            adsRes &&
+            adsRes.ok &&
+            adsRes.json?.success &&
+            Array.isArray(adsRes.json.data)
+          ) {
+            const mappedAds: Advertisement[] = adsRes.json.data.map(
+              (b: any) => ({
                 _id: b._id || Math.random().toString(36).slice(2),
                 title: b.title,
                 description: "",
@@ -91,52 +92,53 @@ const PropertyAdsSlider: React.FC = () => {
                 link: b.link,
                 position: "homepage_middle",
                 active: b.isActive !== false,
-              }));
-              setAds(mappedAds);
-              console.log("✅ Loaded", mappedAds.length, "home advertisements");
-            }
+              }),
+            );
+            setAds(mappedAds);
+            console.log("✅ Loaded", mappedAds.length, "home advertisements");
           } else {
-            console.warn(`⚠️ Advertisement request failed: ${adsResponse.status}`);
+            console.warn("⚠️ Advertisement request not OK or empty", {
+              status: adsRes?.status,
+              ok: adsRes?.ok,
+              err: adsRes?.json?.error,
+            });
           }
         } catch (error: any) {
-          if (error instanceof NetworkError) {
-            console.warn(`⚠️ Advertisement fetch failed: ${error.message} (${error.code})`);
-          } else if (error?.name === "AbortError") {
-            console.warn("⏰ Advertisement fetch timed out");
-          } else {
-            console.warn("⚠️ Failed to fetch advertisements:", String(error));
-          }
+          console.warn(
+            "⚠️ Failed to fetch advertisements:",
+            error?.message || String(error),
+          );
         }
 
         // Fetch featured properties as fallback
         try {
-          const propertiesResponse = await safeFetch("/api/properties/featured", { timeout: 5000 });
-
-          if (propertiesResponse.ok) {
-            const propertiesData = await propertiesResponse.json();
-            if (
-              propertiesData.success &&
-              propertiesData.data &&
-              Array.isArray(propertiesData.data)
-            ) {
-              setProperties(propertiesData.data);
-              console.log(
-                "✅ Loaded",
-                propertiesData.data.length,
-                "featured properties",
-              );
-            }
+          const propsRes = await (window as any).api("/properties/featured", {
+            timeout: 7000,
+          });
+          if (
+            propsRes &&
+            propsRes.ok &&
+            propsRes.json?.success &&
+            Array.isArray(propsRes.json.data)
+          ) {
+            setProperties(propsRes.json.data);
+            console.log(
+              "✅ Loaded",
+              propsRes.json.data.length,
+              "featured properties",
+            );
           } else {
-            console.warn(`⚠️ Featured properties request failed: ${propertiesResponse.status}`);
+            console.warn("⚠️ Featured properties request not OK or empty", {
+              status: propsRes?.status,
+              ok: propsRes?.ok,
+              err: propsRes?.json?.error,
+            });
           }
         } catch (error: any) {
-          if (error instanceof NetworkError) {
-            console.warn(`⚠️ Featured properties fetch failed: ${error.message} (${error.code})`);
-          } else if (error?.name === "AbortError") {
-            console.warn("⏰ Featured properties fetch timed out");
-          } else {
-            console.warn("⚠️ Failed to fetch featured properties:", String(error));
-          }
+          console.warn(
+            "⚠️ Failed to fetch featured properties:",
+            error?.message || String(error),
+          );
         }
       } catch (error) {
         console.error("❌ Error fetching data:", error);

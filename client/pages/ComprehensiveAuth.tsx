@@ -103,6 +103,21 @@ const ComprehensiveAuth = () => {
 
     try {
       const isLogin = activeTab === "login";
+
+      // Basic client-side validation to avoid 400s and show friendlier messages
+      if (!isLogin) {
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.name?.trim()) throw new Error("Name is required");
+        if (!formData.email?.trim() || !emailRe.test(formData.email))
+          throw new Error("Enter a valid email address");
+        if (!formData.phone?.trim() || formData.phone.trim().length < 10)
+          throw new Error("Enter a valid 10-digit phone number");
+        if (!formData.password || formData.password.length < 6)
+          throw new Error("Password must be at least 6 characters");
+        if (!["seller", "buyer", "agent", "admin"].includes(formData.userType))
+          throw new Error("Select a valid user type");
+      }
+
       const endpoint = isLogin ? "auth/login" : "auth/register";
       const payload = isLogin
         ? {
@@ -151,8 +166,10 @@ const ComprehensiveAuth = () => {
         error,
       );
 
-      // Handle specific error types
-      let errorMessage = error.message;
+      // Prefer server-provided message when available on our api wrapper
+      let errorMessage =
+        error?.data?.error || error?.data?.message || error.message;
+
       if (
         error.name === "TypeError" &&
         error.message.includes("Failed to fetch")
