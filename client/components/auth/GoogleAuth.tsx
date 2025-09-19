@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Mail, CheckCircle, AlertCircle, Shield, Chrome } from "lucide-react";
-import { signInWithGoogle } from "../../lib/firebase";
+import { signInWithGoogle, isFirebaseConfigured } from "../../lib/firebase";
 import { useFirebaseAuth } from "../../hooks/useFirebaseAuth";
 
 interface GoogleAuthProps {
@@ -91,7 +91,7 @@ export default function GoogleAuth({
         <Button
           onClick={handleGoogleLogin}
           className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400"
-          disabled={loading}
+          enabled={loading}
           size="lg"
         >
           {loading ? (

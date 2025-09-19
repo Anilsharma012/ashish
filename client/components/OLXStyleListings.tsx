@@ -197,6 +197,7 @@ export default function OLXStyleListings() {
               {/* Image */}
               <div className="relative aspect-square">
                 <img
+                  data-wm="1"
                   src={
                     property.coverImageUrl ??
                     property.images?.[0]?.url ??

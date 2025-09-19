@@ -87,7 +87,9 @@ import DynamicPage from "./pages/DynamicPage";
 
 const queryClient = new QueryClient();
 
+import { useWatermark } from "./hooks/useWatermark";
 function App() {
+  useWatermark();
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
