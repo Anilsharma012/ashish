@@ -5,10 +5,12 @@ import Header from "../components/Header";
 import BottomNavigation from "../components/BottomNavigation";
 import { Button } from "../components/ui/button";
 import { Property } from "@shared/types";
+import { useWatermark } from "../hooks/useWatermark";
 
 export default function Properties() {
   const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
+  useWatermark();
   const [loading, setLoading] = useState(true);
 
   const category = searchParams.get("category");
@@ -132,6 +134,7 @@ export default function Properties() {
                 <div className="flex">
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <img
+                      data-wm="1"
                       src={
                         property.images[0] ||
                         "https://via.placeholder.com/300x300?text=No+Image"

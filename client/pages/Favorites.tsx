@@ -12,6 +12,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import { useWatermark } from "../hooks/useWatermark";
 import {
   Tabs,
   TabsContent,
@@ -94,6 +95,7 @@ interface SavedSearch {
 
 export default function Favorites() {
   const { user } = useAuth();
+  useWatermark();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<FavoriteProperty[]>([]);
@@ -543,6 +545,7 @@ export default function Favorites() {
                       <div className="aspect-video w-full bg-gray-200 rounded-t-lg overflow-hidden">
                         {property.images && property.images.length > 0 ? (
                           <img
+                            data-wm="1"
                             src={property.images[0]}
                             alt={property.title}
                             className="w-full h-full object-cover"
@@ -698,6 +701,7 @@ export default function Favorites() {
                         <div className="w-32 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
                           {property.images && property.images.length > 0 ? (
                             <img
+                              data-wm="1"
                               src={property.images[0]}
                               alt={property.title}
                               className="w-full h-full object-cover"

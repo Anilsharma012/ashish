@@ -12,6 +12,7 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
+import { useWatermark } from "../hooks/useWatermark";
 import {
   Tabs,
   TabsContent,
@@ -86,6 +87,7 @@ export default function RecentViews() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  useWatermark();
   const [recentViews, setRecentViews] = useState<ViewedProperty[]>([]);
   const [viewingSessions, setViewingSessions] = useState<ViewingSession[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -540,6 +542,7 @@ export default function RecentViews() {
                       <div className="aspect-video w-full bg-gray-200 rounded-t-lg overflow-hidden">
                         {property.images && property.images.length > 0 ? (
                           <img
+                            data-wm="1"
                             src={property.images[0]}
                             alt={property.title}
                             className="w-full h-full object-cover"
@@ -679,6 +682,7 @@ export default function RecentViews() {
                         <div className="w-32 h-24 bg-gray-200 rounded overflow-hidden flex-shrink-0">
                           {property.images && property.images.length > 0 ? (
                             <img
+                              data-wm="1"
                               src={property.images[0]}
                               alt={property.title}
                               className="w-full h-full object-cover"

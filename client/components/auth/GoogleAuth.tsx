@@ -3,8 +3,9 @@ import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Mail, CheckCircle, AlertCircle, Shield, Chrome } from "lucide-react";
-import { signInWithGoogle } from "../../lib/firebase";
+import { signInWithGoogle, isFirebaseConfigured } from "../../lib/firebase";
 import { useFirebaseAuth } from "../../hooks/useFirebaseAuth";
+import { api } from "../../lib/api";
 
 interface GoogleAuthProps {
   userType?: string;
@@ -21,7 +22,7 @@ export default function GoogleAuth({
   className = "",
   variant = "card",
 }: GoogleAuthProps) {
-  const { loginWithFirebase } = useFirebaseAuth();
+  const { login } = useFirebaseAuth();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,33 +34,36 @@ export default function GoogleAuth({
     setSuccess("");
 
     try {
+      if (!isFirebaseConfigured) {
+        throw new Error(
+          "Google login is unavailable. Firebase is not configured.",
+        );
+      }
+
       console.log("Starting Google authentication...");
 
-      // Sign in with Google popup
-      const firebaseUser = await signInWithGoogle();
-      console.log(
-        "Google authentication successful, Firebase user:",
-        firebaseUser.uid,
-      );
+      // 1) Acquire Firebase ID token via Google popup
+      const { idToken } = await signInWithGoogle();
 
-      // Login with Firebase (this will create or update the user profile)
-      await loginWithFirebase(firebaseUser, userType);
+      // 2) Verify token on backend
+      const { data } = await api.post("auth/google", { idToken, userType });
+      if (!data?.success) {
+        throw new Error(data?.error || "Google authentication failed");
+      }
+
+      // 3) Persist session
+      const { token, user } = data.data;
+      login(token, user);
 
       setSuccess("Successfully signed in with Google!");
-
-      // Call success callback
-      if (onSuccess) {
-        setTimeout(onSuccess, 1000);
-      }
+      if (onSuccess) setTimeout(onSuccess, 300);
     } catch (error: any) {
       console.error("Google authentication failed:", error);
       const errorMessage =
         error.message || "Google authentication failed. Please try again.";
       setError(errorMessage);
 
-      if (onError) {
-        onError(errorMessage);
-      }
+      if (onError) onError(errorMessage);
     } finally {
       setLoading(false);
     }

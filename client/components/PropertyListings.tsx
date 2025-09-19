@@ -100,6 +100,7 @@ export default function PropertyListings() {
                 <div className="flex">
                   <div className="relative w-24 h-24 flex-shrink-0">
                     <img
+                      data-wm="1"
                       src={property.image}
                       alt={property.title}
                       className="w-full h-full object-cover"
@@ -185,6 +186,7 @@ export default function PropertyListings() {
               >
                 <div className="relative">
                   <img
+                    data-wm="1"
                     src={property.image}
                     alt={property.title}
                     className="w-full h-32 object-cover"
