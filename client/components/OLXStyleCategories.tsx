@@ -137,6 +137,15 @@ function OLXStyleCategories() {
 
   const handleCategoryClick = async (category: Category) => {
     try {
+      // Special handling: Other Services should navigate to its own flow
+      if (
+        category.slug === "other-services" ||
+        /other\s*services?/i.test(category.name || "")
+      ) {
+        window.location.href = "/other-services";
+        return;
+      }
+
       // Toggle if same category
       if (activeCat && activeCat.slug === category.slug) {
         setActiveCat(null);
