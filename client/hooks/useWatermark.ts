@@ -9,7 +9,7 @@ import { useEffect } from "react";
  */
 export function useWatermark() {
   useEffect(() => {
-    const TEXT = "ASHISH PROPERTY";
+    const TEXT = "AP.IN";
     const OPACITY = 0.45; // pill bg opacity
     const FONT_WEIGHT = 700;
 
@@ -19,6 +19,7 @@ export function useWatermark() {
       ".property-gallery img",
       ".lightbox img",
       '[role="dialog"] img',
+      'img[data-wm="1"]',
     ];
 
     const exclude = (img: HTMLImageElement) => {
