@@ -168,7 +168,7 @@ export default function EnhancedSellerDashboard() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login");
+      navigate("/auth", { replace: true });
       return;
     }
 
