@@ -32,7 +32,7 @@ function api(p: string, o: any = {}) {
   const timeoutMs = typeof o.timeout === "number" ? o.timeout : 15000;
   const timeoutId = setTimeout(() => {
     try {
-      controller.abort("timeout");
+      controller.abort();
     } catch {}
     console.warn(`⏰ API request timeout after ${timeoutMs}ms:`, url);
   }, timeoutMs);
@@ -47,18 +47,26 @@ function api(p: string, o: any = {}) {
     baseHeaders["Content-Type"] = "application/json";
   }
 
-  const doFetch = () =>
-    fetch(url, {
-      method,
-      headers: baseHeaders,
-      body: bodyContent,
-      signal: controller.signal,
-      keepalive: !!o.keepalive,
-      credentials: o.credentials || "same-origin",
-      mode: "cors",
-      cache: o.cache || "no-store",
-      referrerPolicy: "no-referrer",
-    });
+  // Use an explicit async wrapper so we can reliably catch fetch errors
+  const doFetch = async () => {
+    try {
+      return await fetch(url, {
+        method,
+        headers: baseHeaders,
+        body: bodyContent,
+        signal: controller.signal,
+        keepalive: !!o.keepalive,
+        // Prefer include to match server cookie-based auth when available
+        credentials: o.credentials || "include",
+        // Omit explicit mode to allow browser default behavior for same-origin requests
+        cache: o.cache || "no-store",
+        referrerPolicy: "no-referrer",
+      });
+    } catch (e) {
+      // Re-throw so outer handler can catch and attempt XHR fallback
+      throw e;
+    }
+  };
 
   const xhrFallback = () =>
     new Promise<{ ok: boolean; status: number; data: any }>((resolve) => {
@@ -116,68 +124,93 @@ function api(p: string, o: any = {}) {
     );
   }
 
-  try {
-    return doFetch()
-      .then(async (r) => {
-        clearTimeout(timeoutId);
-
-        console.log("✅ Global API response", {
-          url,
-          status: r.status,
-          ok: r.ok,
-        });
-        const { ok, status, data } = await safeReadResponse(r);
-        return { ok, status, success: ok, data, json: data };
-      })
-      .catch(async (error: any) => {
-        // On any fetch failure (network / TypeError), try XHR fallback as a best-effort
-        try {
-          console.warn("⚠️ fetch failed, attempting XHR fallback:", url, error?.message || error);
-          const res = await xhrFallback();
-          clearTimeout(timeoutId);
-          return {
-            ok: res.ok,
-            status: res.status,
-            success: res.ok,
-            data: res.data,
-            json: res.data,
-          } as any;
-        } catch (xhrError) {
-          // If XHR fallback also fails, convert specific aborts/timeouts to TimeoutError
-          clearTimeout(timeoutId);
-          if (
-            error.name === "AbortError" ||
-            error?.message?.includes("aborted") ||
-            xhrError?.message?.includes("timeout")
-          ) {
-            const timeoutError = new Error(`Request timeout: ${url}`);
-            timeoutError.name = "TimeoutError";
-            throw timeoutError;
-          }
-
-          const networkError = new Error(
-            `Network error: Cannot connect to server at ${url}`,
-          );
-          networkError.name = "NetworkError";
-          // Attach original errors for debugging
-          (networkError as any).cause = { fetchError: error, xhrError };
-          throw networkError;
-        }
-      });
-  } catch (syncError: any) {
-    // Synchronous throw from instrumented fetch; fallback to XHR
-    console.warn("⚠️ fetch threw synchronously, using XHR fallback:", url);
-    return xhrFallback().then((res) => {
+  // Use async/await flow for clearer error handling
+  (async () => {
+    try {
+      const r = await doFetch();
       clearTimeout(timeoutId);
-      return {
-        ok: res.ok,
-        status: res.status,
-        success: res.ok,
-        data: res.data,
-        json: res.data,
-      } as any;
-    });
-  }
+
+      console.log("✅ Global API response", {
+        url,
+        status: r.status,
+        ok: r.ok,
+      });
+
+      const { ok, status, data } = await safeReadResponse(r);
+      return { ok, status, success: ok, data, json: data } as any;
+    } catch (error: any) {
+      try {
+        console.warn("⚠️ fetch failed, attempting XHR fallback:", url, error?.message || error);
+        const res = await xhrFallback();
+        clearTimeout(timeoutId);
+        return {
+          ok: res.ok,
+          status: res.status,
+          success: res.ok,
+          data: res.data,
+          json: res.data,
+        } as any;
+      } catch (xhrError) {
+        clearTimeout(timeoutId);
+        if (
+          error.name === "AbortError" ||
+          error?.message?.includes("aborted") ||
+          xhrError?.message?.includes("timeout")
+        ) {
+          const timeoutError = new Error(`Request timeout: ${url}`);
+          timeoutError.name = "TimeoutError";
+          throw timeoutError;
+        }
+
+        const networkError = new Error(
+          `Network error: Cannot connect to server at ${url}`,
+        );
+        networkError.name = "NetworkError";
+        (networkError as any).cause = { fetchError: error, xhrError };
+        throw networkError;
+      }
+    }
+  })();
+
+  // The async IIFE above returns a promise but we need to return something from this function.
+  // Return a promise that resolves/rejects according to the IIFE result.
+  return (async () => {
+    try {
+      // Await the IIFE by re-invoking doFetch flow to get the consistent promise result
+      const r = await doFetch();
+      clearTimeout(timeoutId);
+      const { ok, status, data } = await safeReadResponse(r);
+      return { ok, status, success: ok, data, json: data } as any;
+    } catch (error: any) {
+      // Attempt XHR fallback
+      try {
+        const res = await xhrFallback();
+        clearTimeout(timeoutId);
+        return {
+          ok: res.ok,
+          status: res.status,
+          success: res.ok,
+          data: res.data,
+          json: res.data,
+        } as any;
+      } catch (xhrError) {
+        clearTimeout(timeoutId);
+        if (
+          error.name === "AbortError" ||
+          error?.message?.includes("aborted") ||
+          xhrError?.message?.includes("timeout")
+        ) {
+          const timeoutError = new Error(`Request timeout: ${url}`);
+          timeoutError.name = "TimeoutError";
+          throw timeoutError;
+        }
+        const networkError = new Error(`Network error: Cannot connect to server at ${url}`);
+        networkError.name = "NetworkError";
+        (networkError as any).cause = { fetchError: error, xhrError };
+        throw networkError;
+      }
+    }
+  })();
 }
 
 // Make it globally available
