@@ -88,42 +88,29 @@ function OLXStyleCategories() {
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
       try {
-        console.log("🔄 Fetching categories with timeout...");
-        const response = await fetch("/api/categories", {
-          headers: { "Content-Type": "application/json" },
-          cache: "no-cache",
-          signal: controller.signal,
-        });
-
+        console.log("🔄 Fetching categories with timeout via global API...");
+        const apiRes = await (window as any).api("/categories?active=true");
         clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const data = await response.json();
-          if (
-            data.success &&
-            data.data &&
-            Array.isArray(data.data) &&
-            data.data.length > 0
-          ) {
-            console.log(
-              "✅ Categories loaded successfully, replacing defaults:",
-              data.data.length,
-            );
-            setCategories(data.data.slice(0, 10));
-            return; // Success
-          }
+        if (apiRes && apiRes.ok && apiRes.json?.success && Array.isArray(apiRes.json.data) && apiRes.json.data.length > 0) {
+          console.log(
+            "✅ Categories loaded successfully, replacing defaults:",
+            apiRes.json.data.length,
+          );
+          setCategories(apiRes.json.data.slice(0, 10));
+          return; // Success
         }
 
-        console.log("⚠️ API response not as expected, keeping defaults");
-      } catch (fetchError) {
+        console.log("⚠️ Categories API not OK or empty; keeping defaults");
+      } catch (fetchError: any) {
         clearTimeout(timeoutId);
 
-        if (fetchError.name === "AbortError") {
-          console.warn("⏰ Fetch timeout - keeping default categories");
+        if (fetchError?.name === "TimeoutError" || fetchError?.name === "AbortError") {
+          console.warn("⏰ Categories request timeout - keeping default categories");
         } else {
           console.warn(
-            "⚠️ Fetch failed:",
-            fetchError.message,
+            "⚠️ Categories request failed:",
+            fetchError?.message || fetchError,
             "- keeping defaults",
           );
         }
