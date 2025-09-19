@@ -32,8 +32,15 @@ export default function HomepageBanner({
     try {
       console.log(`🏷️ Fetching banners for position: ${position}`);
 
-      const apiRes = await (window as any).api("/banners?active=true", { timeout: 8000 });
-      if (apiRes && apiRes.ok && apiRes.json?.success && Array.isArray(apiRes.json.data)) {
+      const apiRes = await (window as any).api("/banners?active=true", {
+        timeout: 8000,
+      });
+      if (
+        apiRes &&
+        apiRes.ok &&
+        apiRes.json?.success &&
+        Array.isArray(apiRes.json.data)
+      ) {
         setBanners(apiRes.json.data);
       } else {
         console.log("⚠️ Banners request not OK or empty", {

@@ -69,7 +69,10 @@ if (isConfigured) {
       analytics = getAnalytics(app);
     } catch (e) {
       // Avoid crashing on analytics/installation registration issues in dev
-      console.warn("Analytics initialization skipped:", (e as any)?.message || e);
+      console.warn(
+        "Analytics initialization skipped:",
+        (e as any)?.message || e,
+      );
     }
   }
 } else {

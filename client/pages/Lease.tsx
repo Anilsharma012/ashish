@@ -36,7 +36,11 @@ export default function Lease() {
         setSubcategories(data.data);
         return;
       } else {
-        console.warn("Subcategories API non-OK; using fallback", apiResponse?.status, data?.error);
+        console.warn(
+          "Subcategories API non-OK; using fallback",
+          apiResponse?.status,
+          data?.error,
+        );
       }
     } catch (error) {
       console.warn("Subcategories API failed, using fallback:", error);
@@ -44,12 +48,48 @@ export default function Lease() {
       // Fallback demo data (always ensure UI has content)
       if (!Array.isArray(subcategories) || subcategories.length === 0) {
         setSubcategories([
-          { id: "office", name: "Office Space", slug: "office", description: "Commercial office space", count: 35 },
-          { id: "retail", name: "Retail Space", slug: "retail", description: "Shops and showrooms", count: 28 },
-          { id: "warehouse", name: "Warehouse", slug: "warehouse", description: "Storage and warehouse", count: 12 },
-          { id: "industrial", name: "Industrial", slug: "industrial", description: "Industrial properties", count: 8 },
-          { id: "restaurant", name: "Restaurant Space", slug: "restaurant", description: "Restaurant and food space", count: 15 },
-          { id: "hotel", name: "Hotel/Lodge", slug: "hotel", description: "Hospitality properties", count: 6 },
+          {
+            id: "office",
+            name: "Office Space",
+            slug: "office",
+            description: "Commercial office space",
+            count: 35,
+          },
+          {
+            id: "retail",
+            name: "Retail Space",
+            slug: "retail",
+            description: "Shops and showrooms",
+            count: 28,
+          },
+          {
+            id: "warehouse",
+            name: "Warehouse",
+            slug: "warehouse",
+            description: "Storage and warehouse",
+            count: 12,
+          },
+          {
+            id: "industrial",
+            name: "Industrial",
+            slug: "industrial",
+            description: "Industrial properties",
+            count: 8,
+          },
+          {
+            id: "restaurant",
+            name: "Restaurant Space",
+            slug: "restaurant",
+            description: "Restaurant and food space",
+            count: 15,
+          },
+          {
+            id: "hotel",
+            name: "Hotel/Lodge",
+            slug: "hotel",
+            description: "Hospitality properties",
+            count: 6,
+          },
         ]);
       }
       setLoading(false);

@@ -30,10 +30,14 @@ export async function safeFetch(
 
   // Compose timeout signal with any external signal
   const controller = new AbortController();
-  const externalSignal = (fetchOptions as any).signal as AbortSignal | undefined;
-  const onExternalAbort = () => controller.abort(externalSignal?.reason || "external-abort");
+  const externalSignal = (fetchOptions as any).signal as
+    | AbortSignal
+    | undefined;
+  const onExternalAbort = () =>
+    controller.abort(externalSignal?.reason || "external-abort");
   if (externalSignal) {
-    if (externalSignal.aborted) controller.abort(externalSignal.reason || "external-abort");
+    if (externalSignal.aborted)
+      controller.abort(externalSignal.reason || "external-abort");
     else externalSignal.addEventListener("abort", onExternalAbort);
   }
   const timeoutId = setTimeout(() => controller.abort("timeout"), timeout);
@@ -50,15 +54,20 @@ export async function safeFetch(
     });
 
     clearTimeout(timeoutId);
-    if (externalSignal) externalSignal.removeEventListener("abort", onExternalAbort);
+    if (externalSignal)
+      externalSignal.removeEventListener("abort", onExternalAbort);
     return response;
   } catch (error: any) {
     clearTimeout(timeoutId);
-    if (externalSignal) externalSignal.removeEventListener("abort", onExternalAbort);
+    if (externalSignal)
+      externalSignal.removeEventListener("abort", onExternalAbort);
 
     // Handle different types of errors
     if (error.name === "AbortError") {
-      const reason = (error as any)?.cause || (controller as any)?.signal?.reason || "timeout";
+      const reason =
+        (error as any)?.cause ||
+        (controller as any)?.signal?.reason ||
+        "timeout";
       throw new NetworkError(
         `Request aborted (${String(reason)}) after ${timeout}ms`,
         "TIMEOUT",

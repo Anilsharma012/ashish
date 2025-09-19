@@ -74,17 +74,26 @@ const PropertyAdsSlider: React.FC = () => {
 
         // Try to fetch advertisements first (using banners with home position)
         try {
-          const adsRes = await (window as any).api("/banners?active=true", { timeout: 7000 });
-          if (adsRes && adsRes.ok && adsRes.json?.success && Array.isArray(adsRes.json.data)) {
-            const mappedAds: Advertisement[] = adsRes.json.data.map((b: any) => ({
-              _id: b._id || Math.random().toString(36).slice(2),
-              title: b.title,
-              description: "",
-              image: b.imageUrl,
-              link: b.link,
-              position: "homepage_middle",
-              active: b.isActive !== false,
-            }));
+          const adsRes = await (window as any).api("/banners?active=true", {
+            timeout: 7000,
+          });
+          if (
+            adsRes &&
+            adsRes.ok &&
+            adsRes.json?.success &&
+            Array.isArray(adsRes.json.data)
+          ) {
+            const mappedAds: Advertisement[] = adsRes.json.data.map(
+              (b: any) => ({
+                _id: b._id || Math.random().toString(36).slice(2),
+                title: b.title,
+                description: "",
+                image: b.imageUrl,
+                link: b.link,
+                position: "homepage_middle",
+                active: b.isActive !== false,
+              }),
+            );
             setAds(mappedAds);
             console.log("✅ Loaded", mappedAds.length, "home advertisements");
           } else {
@@ -95,15 +104,29 @@ const PropertyAdsSlider: React.FC = () => {
             });
           }
         } catch (error: any) {
-          console.warn("⚠️ Failed to fetch advertisements:", error?.message || String(error));
+          console.warn(
+            "⚠️ Failed to fetch advertisements:",
+            error?.message || String(error),
+          );
         }
 
         // Fetch featured properties as fallback
         try {
-          const propsRes = await (window as any).api("/properties/featured", { timeout: 7000 });
-          if (propsRes && propsRes.ok && propsRes.json?.success && Array.isArray(propsRes.json.data)) {
+          const propsRes = await (window as any).api("/properties/featured", {
+            timeout: 7000,
+          });
+          if (
+            propsRes &&
+            propsRes.ok &&
+            propsRes.json?.success &&
+            Array.isArray(propsRes.json.data)
+          ) {
             setProperties(propsRes.json.data);
-            console.log("✅ Loaded", propsRes.json.data.length, "featured properties");
+            console.log(
+              "✅ Loaded",
+              propsRes.json.data.length,
+              "featured properties",
+            );
           } else {
             console.warn("⚠️ Featured properties request not OK or empty", {
               status: propsRes?.status,
@@ -112,7 +135,10 @@ const PropertyAdsSlider: React.FC = () => {
             });
           }
         } catch (error: any) {
-          console.warn("⚠️ Failed to fetch featured properties:", error?.message || String(error));
+          console.warn(
+            "⚠️ Failed to fetch featured properties:",
+            error?.message || String(error),
+          );
         }
       } catch (error) {
         console.error("❌ Error fetching data:", error);

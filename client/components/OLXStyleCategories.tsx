@@ -94,7 +94,13 @@ function OLXStyleCategories() {
         const apiRes = await (window as any).api("/categories?active=true");
         clearTimeout(timeoutId);
 
-        if (apiRes && apiRes.ok && apiRes.json?.success && Array.isArray(apiRes.json.data) && apiRes.json.data.length > 0) {
+        if (
+          apiRes &&
+          apiRes.ok &&
+          apiRes.json?.success &&
+          Array.isArray(apiRes.json.data) &&
+          apiRes.json.data.length > 0
+        ) {
           console.log(
             "✅ Categories loaded successfully, replacing defaults:",
             apiRes.json.data.length,
@@ -107,8 +113,13 @@ function OLXStyleCategories() {
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
 
-        if (fetchError?.name === "TimeoutError" || fetchError?.name === "AbortError") {
-          console.warn("⏰ Categories request timeout - keeping default categories");
+        if (
+          fetchError?.name === "TimeoutError" ||
+          fetchError?.name === "AbortError"
+        ) {
+          console.warn(
+            "⏰ Categories request timeout - keeping default categories",
+          );
         } else {
           console.warn(
             "⚠️ Categories request failed:",
@@ -218,7 +229,9 @@ function OLXStyleCategories() {
                 onClick={() => handleCategoryClick(category)}
                 className={`flex flex-col items-center cursor-pointer active:scale-95 transition-transform ${isActive ? "opacity-100" : "opacity-90"}`}
               >
-                <div className={`w-14 h-14 ${isActive ? "bg-red-100" : "bg-red-50"} border border-red-100 rounded-lg flex items-center justify-center mb-2 hover:bg-red-100 transition-colors`}>
+                <div
+                  className={`w-14 h-14 ${isActive ? "bg-red-100" : "bg-red-50"} border border-red-100 rounded-lg flex items-center justify-center mb-2 hover:bg-red-100 transition-colors`}
+                >
                   <IconComponent className="h-7 w-7 text-[#C70000]" />
                 </div>
                 <span className="text-xs text-gray-800 text-center font-medium leading-tight">
@@ -237,17 +250,23 @@ function OLXStyleCategories() {
         <div className="px-4 pb-12">
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900">{activeCat.name} Subcategories</h3>
+              <h3 className="font-semibold text-gray-900">
+                {activeCat.name} Subcategories
+              </h3>
               <button
                 className="text-sm text-[#C70000] hover:underline"
-                onClick={() => (window.location.href = `/categories/${activeCat.slug}`)}
+                onClick={() =>
+                  (window.location.href = `/categories/${activeCat.slug}`)
+                }
               >
                 View All
               </button>
             </div>
 
             {activeSubcats.length === 0 ? (
-              <div className="text-sm text-gray-500">No subcategories found</div>
+              <div className="text-sm text-gray-500">
+                No subcategories found
+              </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {activeSubcats.map((sub: any) => (
@@ -260,7 +279,9 @@ function OLXStyleCategories() {
                       {sub.name || sub.title || sub.slug}
                     </div>
                     {sub.description && (
-                      <div className="text-xs text-gray-500 mt-1 line-clamp-2">{sub.description}</div>
+                      <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        {sub.description}
+                      </div>
                     )}
                   </a>
                 ))}
