@@ -10,6 +10,7 @@ import { useWatermark } from "../hooks/useWatermark";
 export default function Properties() {
   const [searchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
+  useWatermark();
   const [loading, setLoading] = useState(true);
 
   const category = searchParams.get("category");
