@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Mail, CheckCircle, AlertCircle, Shield, Chrome } from "lucide-react";
-import { signInWithGoogle } from "../../lib/firebase";
+import { signInWithGoogle, isFirebaseConfigured } from "../../lib/firebase";
 import { useFirebaseAuth } from "../../hooks/useFirebaseAuth";
 
 interface GoogleAuthProps {
