@@ -4,6 +4,7 @@ import { Property } from "@shared/types";
 import { api } from "../lib/api";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
+import { useWatermark } from "../hooks/useWatermark";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Plus, Home, Eye, MessageSquare, Heart, Phone, User, Settings, LogOut, Bell, Clock, CheckCircle } from "lucide-react";
