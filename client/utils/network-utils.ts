@@ -17,6 +17,8 @@ export class NetworkError extends Error {
   }
 }
 
+import { createApiUrl } from "../lib/api";
+
 export async function safeFetch(
   url: string,
   options: FetchOptions = {},
