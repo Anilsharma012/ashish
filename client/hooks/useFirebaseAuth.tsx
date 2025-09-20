@@ -73,6 +73,14 @@ export const FirebaseAuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
+    // If Firebase is not configured, skip listener and clear loading
+    if (!auth) {
+      console.warn("Firebase not configured - skipping auth state listener");
+      // Ensure we reflect any stored auth info and stop loading
+      setLoading(false);
+      return;
+    }
+
     // Set up Firebase auth state listener
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
       console.log("Firebase auth state changed:", !!firebaseUser);
