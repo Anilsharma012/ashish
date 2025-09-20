@@ -57,24 +57,38 @@ async function ensureUniqueSlug(
   }
 }
 
-// PUBLIC: Get active categories with optional subcategories
+// PUBLIC: Get active / published categories with optional subcategories
 export const getCategories: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
-    const { active, withSub } = req.query;
+    const { active, withSub, published, limit, sort } = req.query;
 
-    // Build filter
+    // Build filter (support both `active` and `published` query params)
     const filter: any = {};
-    if (active === "true") {
+    if (active === "true" || published === "true") {
       filter.isActive = true;
     }
 
-    // Get categories sorted by sortOrder
-    const categories = await db
-      .collection("categories")
-      .find(filter)
-      .sort({ sortOrder: 1, createdAt: 1 })
-      .toArray();
+    // Determine sort order
+    let sortObj: any = { sortOrder: 1, createdAt: -1 };
+    const sortParam = typeof sort === "string" ? sort.toLowerCase() : "";
+    if (sortParam === "data.order" || sortParam === "order" || sortParam === "sortorder") {
+      sortObj = { sortOrder: 1, createdAt: -1 };
+    } else if (sortParam.includes("createddate desc") || sortParam.includes("createdat desc") || sortParam.includes("createdat-")) {
+      sortObj = { createdAt: -1 };
+    }
+
+    // Parse limit if provided
+    let limitNum: number | undefined = undefined;
+    if (typeof limit === "string") {
+      const n = parseInt(limit, 10);
+      if (!Number.isNaN(n) && n > 0) limitNum = n;
+    }
+
+    // Get categories (apply limit if provided)
+    let cursor = db.collection("categories").find(filter).sort(sortObj);
+    if (limitNum) cursor = cursor.limit(limitNum);
+    const categories = await cursor.toArray();
 
     let result = categories;
 
@@ -82,14 +96,17 @@ export const getCategories: RequestHandler = async (req, res) => {
     if (withSub === "true") {
       result = await Promise.all(
         categories.map(async (category: any) => {
-          const subcategories = await db
+          const subFilter: any = { categoryId: category._id.toString() };
+          if (active === "true" || published === "true") subFilter.isActive = true;
+
+          const subsCursor = db
             .collection("subcategories")
-            .find({
-              categoryId: category._id.toString(),
-              ...(active === "true" ? { isActive: true } : {}),
-            })
-            .sort({ sortOrder: 1, createdAt: 1 })
-            .toArray();
+            .find(subFilter)
+            .sort({ sortOrder: 1, createdAt: -1 });
+
+          if (limitNum) subsCursor.limit(limitNum);
+
+          const subcategories = await subsCursor.toArray();
 
           return {
             ...category,
@@ -122,6 +139,9 @@ export const getCategories: RequestHandler = async (req, res) => {
     });
   }
 };
+
+// Note: This endpoint intentionally supports both `active` and `published` query params
+// so frontends using either naming can retrieve published categories consistently.
 
 // PUBLIC: Get category by slug with subcategories
 export const getCategoryBySlug: RequestHandler = async (req, res) => {
