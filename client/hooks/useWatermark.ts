@@ -9,7 +9,7 @@ import { useEffect } from "react";
  */
 export function useWatermark() {
   useEffect(() => {
-    const TEXT = "ashishproperties.in"; // watermark text (small, side, repeated)
+    const TEXT = "AshishProperties.in";
     const FONT_WEIGHT = 800;
 
     const selectors = [
@@ -61,11 +61,10 @@ export function useWatermark() {
       letterSpacing: number,
     ) => {
       let w = 0;
-      const upper = text.toUpperCase();
-      for (let i = 0; i < upper.length; i++) {
-        const m = ctx.measureText(upper[i]);
+      for (let i = 0; i < text.length; i++) {
+        const m = ctx.measureText(text[i]);
         w += m.width;
-        if (i !== upper.length - 1) w += letterSpacing;
+        if (i !== text.length - 1) w += letterSpacing;
       }
       return w;
     };
@@ -101,30 +100,15 @@ export function useWatermark() {
       ctx.clearRect(0, 0, w, h);
       ctx.drawImage(off, 0, 0, w, h);
 
-      // Compute font size relative to how large the image is displayed to keep consistency
-      const rect = img.getBoundingClientRect();
-      const dispW = Math.max(1, rect.width || img.width || w);
-      const dispH = Math.max(1, rect.height || img.height || h);
-      const base = Math.min(dispW, dispH);
-
-      // Font sizing and spacing
-      let fontPx = Math.max(24, Math.round(base * 0.16)); // ~16% of shorter side
-      const letterSpacingPx = Math.round(fontPx * 0.06);
+      // Fixed watermark size and placement (~12px) bottom-right
+      const fontPx = 12;
+      const letterSpacingPx = Math.round(fontPx * 0.05);
 
       ctx.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
-      const text = TEXT.toUpperCase();
-      let textW = measureTextWithSpacing(ctx, text, letterSpacingPx);
+      const text = TEXT;
+      const textW = measureTextWithSpacing(ctx, text, letterSpacingPx);
 
-      // Constrain width to 70% of image width
-      const maxW = w * 0.7;
-      if (textW > maxW) {
-        const s = maxW / textW;
-        fontPx = Math.max(18, Math.floor(fontPx * s));
-        ctx.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
-        textW = measureTextWithSpacing(ctx, text, Math.round(fontPx * 0.06));
-      }
-
-      const margin = Math.max(12, Math.round(Math.min(w, h) * 0.035));
+      const margin = 8;
       const xStart = Math.max(0, w - textW - margin);
       const y = Math.max(fontPx + margin, h - margin);
 
@@ -132,9 +116,9 @@ export function useWatermark() {
       ctx.save();
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
-      ctx.fillStyle = "rgba(255,255,255,0.72)";
-      ctx.strokeStyle = "rgba(0,0,0,0.25)";
-      ctx.lineWidth = Math.max(1, Math.round(fontPx * 0.06));
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.strokeStyle = "rgba(0,0,0,0.35)";
+      ctx.lineWidth = 1;
 
       // Manual draw to apply letter spacing
       let x = xStart;
@@ -142,7 +126,7 @@ export function useWatermark() {
         const ch = text[i];
         ctx.strokeText(ch, x, y);
         ctx.fillText(ch, x, y);
-        x += ctx.measureText(ch).width + Math.round(fontPx * 0.06);
+        x += ctx.measureText(ch).width + letterSpacingPx;
       }
       ctx.restore();
 
@@ -194,40 +178,27 @@ export function useWatermark() {
       const overlay = document.createElement("div");
       overlay.setAttribute("data-wm-overlay", "1");
       overlay.setAttribute("aria-hidden", "true");
-      // Make overlay cover the entire host and tile the watermark text across it
+      // Overlay host
       overlay.style.position = "absolute";
       overlay.style.inset = "0";
       overlay.style.pointerEvents = "none";
       overlay.style.zIndex = "60";
-      overlay.style.display = "flex";
-      overlay.style.flexWrap = "wrap";
-      overlay.style.alignItems = "center";
-      overlay.style.justifyContent = "center";
-      overlay.style.gap = "2rem";
-      overlay.style.opacity = "0.18";
+      overlay.style.display = "block";
 
-      // Create multiple watermark nodes tiled across the area
-      const tileCountX = Math.max(3, Math.round(dispW / 160));
-      const tileCountY = Math.max(2, Math.round(dispH / 120));
-      const fontPx = Math.max(12, Math.round(Math.min(dispW, dispH) * 0.06));
-
-      for (let y = 0; y < tileCountY; y++) {
-        for (let x = 0; x < tileCountX; x++) {
-          const text = document.createElement("div");
-          text.textContent = TEXT;
-          text.style.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
-          text.style.textTransform = "lowercase";
-          text.style.color = "rgba(0,0,0,0.24)";
-          text.style.transform = "rotate(-25deg)";
-          text.style.userSelect = "none";
-          text.style.pointerEvents = "none";
-          text.style.whiteSpace = "nowrap";
-          text.style.letterSpacing = "1px";
-          overlay.appendChild(text);
-        }
-      }
-
+      // Single bottom-right label (~12px)
+      const label = document.createElement("div");
+      label.textContent = TEXT;
+      label.style.position = "absolute";
+      label.style.right = "8px";
+      label.style.bottom = "6px";
+      label.style.font = `${FONT_WEIGHT} 12px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+      label.style.color = "rgba(255,255,255,0.95)";
+      label.style.textShadow = "0 1px 2px rgba(0,0,0,0.6)";
+      label.style.userSelect = "none";
+      label.style.pointerEvents = "none";
+      label.style.whiteSpace = "nowrap";
       host.appendChild(overlay);
+      overlay.appendChild(label);
     };
 
     const process = async (img: HTMLImageElement) => {
