@@ -36,7 +36,7 @@ import UnifiedLoginNotice from "../components/UnifiedLoginNotice";
 
 const ComprehensiveAuth = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, loginWithFirebase, isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
   const [authMode, setAuthMode] = useState<"password" | "otp" | "google">(
     "password",
