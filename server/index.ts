@@ -539,13 +539,29 @@ export function createServer() {
     /^http?:\/\/aashish\.posttrr\.com$/i,
   ];
 
+  // Allow configuring additional origins via env and provide an escape hatch for staging/demo deployments
+  const envAllowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const allowAllOrigins = process.env.CORS_ALLOW_ALL === "true";
+
   app.use(
     cors({
       origin: function (origin, callback) {
+        // Non-browser requests like curl will not send origin
         if (!origin) return callback(null, true);
 
+        // If allow-all is enabled (useful for staging/demo), allow and log a warning
+        if (allowAllOrigins) {
+          console.warn("⚠️ CORS_ALLOW_ALL=true - allowing request from:", origin);
+          return callback(null, true);
+        }
+
+        // Merge built-in allowed origins with environment-provided ones
+        const combinedAllowed = [...allowedOrigins, ...envAllowedOrigins];
+
         // Allow listed exact origins
-        if (allowedOrigins.includes(origin)) {
+        if (combinedAllowed.includes(origin)) {
           console.log("✅ CORS allowed (exact):", origin);
           return callback(null, true);
         }
