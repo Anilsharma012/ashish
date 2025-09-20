@@ -54,7 +54,6 @@ export default function Index() {
       {/* <PWAInstallButton /> */}{" "}
       {/* Removed red Install App button as requested */}
       <StaticFooter />
-
       {/* AI Chat Launcher (homepage only) */}
       <React.Suspense fallback={null}>
         <AIChatLauncher />

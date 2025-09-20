@@ -72,9 +72,17 @@ export const getCategories: RequestHandler = async (req, res) => {
     // Determine sort order
     let sortObj: any = { sortOrder: 1, createdAt: -1 };
     const sortParam = typeof sort === "string" ? sort.toLowerCase() : "";
-    if (sortParam === "data.order" || sortParam === "order" || sortParam === "sortorder") {
+    if (
+      sortParam === "data.order" ||
+      sortParam === "order" ||
+      sortParam === "sortorder"
+    ) {
       sortObj = { sortOrder: 1, createdAt: -1 };
-    } else if (sortParam.includes("createddate desc") || sortParam.includes("createdat desc") || sortParam.includes("createdat-")) {
+    } else if (
+      sortParam.includes("createddate desc") ||
+      sortParam.includes("createdat desc") ||
+      sortParam.includes("createdat-")
+    ) {
       sortObj = { createdAt: -1 };
     }
 
@@ -97,7 +105,8 @@ export const getCategories: RequestHandler = async (req, res) => {
       result = await Promise.all(
         categories.map(async (category: any) => {
           const subFilter: any = { categoryId: category._id.toString() };
-          if (active === "true" || published === "true") subFilter.isActive = true;
+          if (active === "true" || published === "true")
+            subFilter.isActive = true;
 
           const subsCursor = db
             .collection("subcategories")

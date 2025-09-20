@@ -272,7 +272,10 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
     } catch (popupError: any) {
       // If popup fails due to being blocked, fallback to redirect
       const code = popupError?.code || "";
-      if (code === "auth/popup-blocked" || code === "auth/popup-closed-by-user") {
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/popup-closed-by-user"
+      ) {
         try {
           await signInWithRedirect(auth, googleProvider);
           // After redirect, the app will reload and getRedirectResult will resolve
@@ -312,7 +315,10 @@ export const signInWithGoogle = async (): Promise<FirebaseUser> => {
           "Network error. Add this preview domain to Firebase > Authentication > Settings > Authorized domains, then retry.";
         break;
       default:
-        message = (error && (error as any).message) || authError?.message || "Google authentication failed";
+        message =
+          (error && (error as any).message) ||
+          authError?.message ||
+          "Google authentication failed";
     }
 
     throw new Error(message);

@@ -134,7 +134,9 @@ const ComprehensiveAuth = () => {
       const endpoint = isLogin ? "auth/login" : "auth/register";
       // sanitize inputs
       const sanitizedEmail = formData.email?.trim().toLowerCase() || undefined;
-      const sanitizedPhoneRaw = formData.phone ? String(formData.phone).replace(/[^0-9+]/g, "") : undefined;
+      const sanitizedPhoneRaw = formData.phone
+        ? String(formData.phone).replace(/[^0-9+]/g, "")
+        : undefined;
       // if phone starts with 0 or missing country code, strip leading zeros
       const sanitizedPhone = sanitizedPhoneRaw
         ? sanitizedPhoneRaw.replace(/^0+/, "").slice(-10)
@@ -164,8 +166,12 @@ const ComprehensiveAuth = () => {
       } catch (apiErr: any) {
         console.warn("API post error:", apiErr);
         // api.post throws for non-2xx responses; show server message if available
-        const serverMsg = apiErr?.message || apiErr?.data?.error || apiErr?.data?.message;
-        setError(serverMsg || (isLogin ? "Invalid credentials" : "Registration failed"));
+        const serverMsg =
+          apiErr?.message || apiErr?.data?.error || apiErr?.data?.message;
+        setError(
+          serverMsg ||
+            (isLogin ? "Invalid credentials" : "Registration failed"),
+        );
         setLoading(false);
         return;
       }
@@ -227,7 +233,9 @@ const ComprehensiveAuth = () => {
     }
 
     if (!isFirebaseConfigured) {
-      setError("Phone authentication is unavailable: Firebase is not configured.");
+      setError(
+        "Phone authentication is unavailable: Firebase is not configured.",
+      );
       return;
     }
 
@@ -241,13 +249,19 @@ const ComprehensiveAuth = () => {
       }
 
       // Initialize invisible reCAPTCHA and send OTP
-      await phoneAuthServiceRef.current.initializeRecaptcha("recaptcha-container", "invisible");
+      await phoneAuthServiceRef.current.initializeRecaptcha(
+        "recaptcha-container",
+        "invisible",
+      );
       await phoneAuthServiceRef.current.sendOTP(formData.phone);
 
       setOtpSent(true);
       setOtpTimer(60);
       setSuccess("OTP sent successfully. Enter the 6-digit code you received.");
-      toast({ title: "OTP sent", description: `OTP sent to ${formData.phone}` });
+      toast({
+        title: "OTP sent",
+        description: `OTP sent to ${formData.phone}`,
+      });
     } catch (err: any) {
       console.error("sendOTP error:", err);
       const msg = err?.message || "Failed to send OTP";
@@ -269,7 +283,9 @@ const ComprehensiveAuth = () => {
         throw new Error("No OTP flow initialized. Please request OTP first.");
       }
 
-      const firebaseUser = await phoneAuthServiceRef.current.verifyOTP(formData.otp);
+      const firebaseUser = await phoneAuthServiceRef.current.verifyOTP(
+        formData.otp,
+      );
 
       // Login/create user in Firestore and redirect
       await loginWithFirebase(firebaseUser, formData.userType);

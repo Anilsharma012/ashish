@@ -60,7 +60,9 @@ const CategoryDrawer: React.FC<CategoryDrawerProps> = ({ isOpen, onClose }) => {
       const allCategories: Category[] = [];
 
       // Fetch property categories with subcategories (public API)
-      const propRes = await fetch(`/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`);
+      const propRes = await fetch(
+        `/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`,
+      );
       if (propRes.ok) {
         const propJson = await propRes.json();
         if (propJson.success && Array.isArray(propJson.data)) {

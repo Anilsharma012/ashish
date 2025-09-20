@@ -54,7 +54,9 @@ export default function Categories() {
           Pragma: "no-cache",
         },
       });
-      const data = await response.json().catch(() => ({ success: false, data: [] }));
+      const data = await response
+        .json()
+        .catch(() => ({ success: false, data: [] }));
 
       if (data.success) {
         setCategories(data.data || []);
@@ -279,7 +281,9 @@ export default function Categories() {
         {/* Categories List */}
         <div className="space-y-2">
           {categories.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">No categories yet</div>
+            <div className="text-center text-gray-500 py-8">
+              No categories yet
+            </div>
           ) : (
             categories.map((category) => (
               <button
@@ -302,7 +306,7 @@ export default function Categories() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                    {(category.subcategories?.length ?? 0)} types
+                    {category.subcategories?.length ?? 0} types
                   </span>
                   <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>

@@ -85,17 +85,25 @@ function OLXStyleCategories() {
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       try {
-        const res = await fetch(`/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`, {
-          signal: controller.signal,
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
+        const res = await fetch(
+          `/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`,
+          {
+            signal: controller.signal,
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
           },
-        });
+        );
         clearTimeout(timeoutId);
 
         const data = await res.json().catch(() => ({ success: false }));
-        if (res.ok && data?.success && Array.isArray(data.data) && data.data.length > 0) {
+        if (
+          res.ok &&
+          data?.success &&
+          Array.isArray(data.data) &&
+          data.data.length > 0
+        ) {
           const mapped: Category[] = data.data.map((c: any) => ({
             _id: c._id,
             name: c.name,
@@ -117,13 +125,18 @@ function OLXStyleCategories() {
           }));
 
           // Sort categories by order then name
-          const sorted = mapped.sort((a, b) => (a.order - b.order) || a.name.localeCompare(b.name));
+          const sorted = mapped.sort(
+            (a, b) => a.order - b.order || a.name.localeCompare(b.name),
+          );
           setCategories(sorted.slice(0, 10));
           return;
         }
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
-        console.warn("⚠️ Categories request failed:", fetchError?.message || fetchError);
+        console.warn(
+          "⚠️ Categories request failed:",
+          fetchError?.message || fetchError,
+        );
       }
     } catch (error) {
       console.error("❌ Unexpected error:", (error as any).message || error);
