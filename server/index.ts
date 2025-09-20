@@ -726,6 +726,14 @@ export function createServer() {
   app.post("/api/auth/register", registerUser);
   app.post("/api/auth/login", loginUser);
   app.post("/api/auth/send-otp", sendOTP);
+
+  // DEV helper to reset password (non-production only)
+  try {
+    const { resetPasswordForUser } = await import("./routes/auth");
+    app.post("/api/debug/reset-password", resetPasswordForUser);
+  } catch (e) {
+    // ignore
+  }
   app.post("/api/auth/verify-otp", verifyOTP);
   app.post("/api/auth/google", googleAuth);
   app.get("/api/auth/profile", authenticateToken, getUserProfile);
