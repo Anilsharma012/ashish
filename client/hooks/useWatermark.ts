@@ -9,7 +9,7 @@ import { useEffect } from "react";
  */
 export function useWatermark() {
   useEffect(() => {
-    const TEXT = "ASHISH PROPERTY"; // watermark text
+    const TEXT = "ashishproperties.in"; // watermark text (small, side, repeated)
     const FONT_WEIGHT = 800;
 
     const selectors = [
