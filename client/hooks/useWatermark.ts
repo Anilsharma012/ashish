@@ -19,6 +19,18 @@ export function useWatermark() {
       ".lightbox img",
       '[role="dialog"] img',
       'img[data-wm="1"]',
+      // Broaden selectors to cover all post/listing images so watermark appears on all posts
+      ".property-card img",
+      ".property-tile img",
+      ".listing-card img",
+      ".post-card img",
+      ".ad-card img",
+      ".featured-ad img",
+      ".property-listing img",
+      ".property-item img",
+      ".listing img",
+      // Fallback: images inside common card container classes
+      ".card img",
     ];
 
     const exclude = (img: HTMLImageElement) => {
