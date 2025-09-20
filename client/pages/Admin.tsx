@@ -925,6 +925,62 @@ export default function Admin() {
                 </div>
                 <QuickCreatePage />
               </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <div>
+                  <p className="text-sm font-medium">Seed System Data</p>
+                  <p className="text-xs text-gray-500">
+                    Initialize default admin, categories and packages in the DB
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    onClick={async () => {
+                      setLoading(true);
+                      setError("");
+                      try {
+                        const resp = await fetch("/api/fix/initialize-system", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                        });
+                        const json = await resp.json();
+                        if (json.success) {
+                          // use simple alert/toast
+                          window.alert(
+                            "Initialization completed: " +
+                              (json.message || "success"),
+                          );
+                        } else {
+                          window.alert(
+                            "Initialization returned errors: " +
+                              JSON.stringify(json.data || json.error || json),
+                          );
+                        }
+                      } catch (err: any) {
+                        console.error("Initialization failed:", err);
+                        window.alert(
+                          "Initialization failed: " + (err?.message || err),
+                        );
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    className="bg-[#C70000] hover:bg-[#A60000]"
+                  >
+                    Initialize System
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      // provide admin quick link to categories management
+                      setActiveSection("categories");
+                    }}
+                    variant="outline"
+                  >
+                    Manage Categories
+                  </Button>
+                </div>
+              </div>
               {[
                 { type: "Seller Verification", count: 12 },
                 { type: "Advertisement Request", count: 5 },
@@ -1098,8 +1154,15 @@ export default function Admin() {
           return (
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-2">Countries</h3>
-              <p className="text-sm text-gray-600 mb-4">This section moved to dedicated page.</p>
-              <a className="text-[#C70000] underline" href="/admin/locations/countries">Go to Countries</a>
+              <p className="text-sm text-gray-600 mb-4">
+                This section moved to dedicated page.
+              </p>
+              <a
+                className="text-[#C70000] underline"
+                href="/admin/locations/countries"
+              >
+                Go to Countries
+              </a>
             </div>
           );
         case "states":

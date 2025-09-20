@@ -524,6 +524,9 @@ export function createServer() {
     "https://880833dcecc84a92861ca2f5c11ffbe5-ddcc24fd377b44659b202fb89.fly.dev.projects.builder.codes",
     "https://aashish.posttrr.com",
     "http://aashish.posttrr.com",
+    // Added per user report to allow requests from this domain
+    "https://dutiful-soliloquy.net",
+    "http://dutiful-soliloquy.net",
   ];
 
   const allowedOriginPatterns = [
@@ -537,15 +540,38 @@ export function createServer() {
     /^(https?:\/\/)?([a-z0-9-]+\.)*netlify\.app$/i,
     /^https?:\/\/aashish\.posttrr\.com$/i,
     /^http?:\/\/aashish\.posttrr\.com$/i,
+    // Allow the dutiful-soliloquy domain and any subdomain
+    /^(https?:\/\/)?([a-z0-9-]+\.)*dutiful-soliloquy\.net$/i,
   ];
+
+  // Allow configuring additional origins via env and provide an escape hatch for staging/demo deployments
+  const envAllowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+  const allowAllOrigins = process.env.CORS_ALLOW_ALL === "true";
 
   app.use(
     cors({
       origin: function (origin, callback) {
+        // Non-browser requests like curl will not send origin
         if (!origin) return callback(null, true);
 
+        // If allow-all is enabled (useful for staging/demo), allow and log a warning
+        if (allowAllOrigins) {
+          console.warn(
+            "⚠️ CORS_ALLOW_ALL=true - allowing request from:",
+            origin,
+          );
+          return callback(null, true);
+        }
+
+        // Merge built-in allowed origins with environment-provided ones
+        const combinedAllowed = [...allowedOrigins, ...envAllowedOrigins];
+
         // Allow listed exact origins
-        if (allowedOrigins.includes(origin)) {
+        if (combinedAllowed.includes(origin)) {
           console.log("✅ CORS allowed (exact):", origin);
           return callback(null, true);
         }
@@ -583,8 +609,18 @@ export function createServer() {
 
   // Initialize MongoDB connection
   connectToDatabase()
-    .then(() => {
+    .then(async () => {
       console.log("✅ MongoDB Atlas connected successfully");
+      try {
+        // Attempt to seed default data if collections are empty (idempotent)
+        const initModule = await import("./routes/init");
+        if (initModule && typeof initModule.seedDefaultData === "function") {
+          const seedResult = await initModule.seedDefaultData();
+          console.log("🔧 seedDefaultData result:", seedResult);
+        }
+      } catch (e: any) {
+        console.warn("⚠️ seedDefaultData failed:", e?.message || e);
+      }
     })
     .catch((error) => {
       console.error("�� MongoDB connection failed:", error);

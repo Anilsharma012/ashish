@@ -256,7 +256,7 @@ const HeroImageSlider: React.FC = () => {
 
       {/* Slide Indicators (Dots) */}
       {banners.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-50">
           {banners.map((_, index) => (
             <button
               key={index}
@@ -274,7 +274,7 @@ const HeroImageSlider: React.FC = () => {
 
       {/* Progress Bar */}
       {banners.length > 1 && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-black bg-opacity-20 z-10">
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-black bg-opacity-20 z-40">
           <div
             className="h-full bg-white bg-opacity-70 transition-all duration-300 ease-in-out"
             style={{
