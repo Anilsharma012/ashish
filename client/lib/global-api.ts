@@ -177,7 +177,14 @@ function api(p: string, o: any = {}) {
         );
         networkError.name = "NetworkError";
         (networkError as any).cause = { fetchError: error, xhrError };
-        throw networkError;
+        // Instead of throwing, return a graceful failure object so UI code can handle it
+        return {
+          ok: false,
+          status: 0,
+          success: false,
+          data: { error: networkError.message },
+          json: { error: networkError.message },
+        } as any;
       }
     }
   })();
