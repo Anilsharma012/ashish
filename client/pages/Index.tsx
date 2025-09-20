@@ -12,7 +12,6 @@ import StaticFooter from "../components/StaticFooter";
 import HeroImageSlider from "../components/HeroImageSlider";
 import PropertyAdsSlider from "../components/PropertyAdsSlider";
 import AdSlot from "../components/AdSlot";
-import React from "react";
 const AIChatLauncher = React.lazy(() => import("../components/AIChatLauncher"));
 
 export default function Index() {
