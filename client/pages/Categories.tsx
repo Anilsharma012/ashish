@@ -43,19 +43,24 @@ export default function Categories() {
     fetchPropertyCounts();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (options: { cacheBust?: boolean } = {}) => {
     try {
       setLoading(true);
-      const response = await fetch("/api/categories", {
+      const cacheBuster = options.cacheBust ? `&_=${Date.now()}` : "";
+      const url = `/api/categories?published=true&limit=200${cacheBuster}`;
+      const response = await fetch(url, {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
         },
       });
-      const data = await response.json();
+      const data = await response.json().catch(() => ({ success: false, data: [] }));
 
       if (data.success) {
-        setCategories(data.data);
+        setCategories(data.data || []);
+        try {
+          window.dispatchEvent(new CustomEvent("categories:updated"));
+        } catch {}
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
