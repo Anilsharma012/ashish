@@ -264,8 +264,16 @@ export default function Categories() {
 
       <div className="px-4 py-6">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-medium text-gray-900">All Categories</h1>
+          <div>
+            <button
+              onClick={() => fetchCategories({ cacheBust: true })}
+              className="text-sm text-[#C70000] font-medium hover:underline"
+            >
+              Refresh categories
+            </button>
+          </div>
         </div>
 
         {/* Categories List */}
