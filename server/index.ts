@@ -524,6 +524,9 @@ export function createServer() {
     "https://880833dcecc84a92861ca2f5c11ffbe5-ddcc24fd377b44659b202fb89.fly.dev.projects.builder.codes",
     "https://aashish.posttrr.com",
     "http://aashish.posttrr.com",
+    // Added per user report to allow requests from this domain
+    "https://dutiful-soliloquy.net",
+    "http://dutiful-soliloquy.net",
   ];
 
   const allowedOriginPatterns = [
@@ -537,6 +540,8 @@ export function createServer() {
     /^(https?:\/\/)?([a-z0-9-]+\.)*netlify\.app$/i,
     /^https?:\/\/aashish\.posttrr\.com$/i,
     /^http?:\/\/aashish\.posttrr\.com$/i,
+    // Allow the dutiful-soliloquy domain and any subdomain
+    /^(https?:\/\/)?([a-z0-9-]+\.)*dutiful-soliloquy\.net$/i,
   ];
 
   // Allow configuring additional origins via env and provide an escape hatch for staging/demo deployments
