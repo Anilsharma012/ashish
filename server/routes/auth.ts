@@ -816,3 +816,34 @@ function toE164(phone: string) {
   if (digits.startsWith("91") && digits.length === 12) return `+${digits}`;
   return phone.startsWith("+") ? phone : `+${digits}`;
 }
+
+// DEV helper: Reset password for a user by email or phone (only in non-production)
+export const resetPasswordForUser: RequestHandler = async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ success: false, error: "Not allowed in production" });
+    }
+
+    const db = getDatabase();
+    const { email, phone, newPassword } = req.body;
+    if (!newPassword || (!email && !phone)) {
+      return res.status(400).json({ success: false, error: "email or phone and newPassword required" });
+    }
+
+    const query: any = {};
+    if (email) query.email = email;
+    if (phone) query.phone = phone;
+
+    const user = await db.collection("users").findOne(query);
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+    const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await db.collection("users").updateOne({ _id: user._id }, { $set: { password: hashed, updatedAt: new Date() } });
+
+    console.log(`Password for user ${user._id} reset via debug endpoint`);
+    res.json({ success: true, message: "Password reset" });
+  } catch (error: any) {
+    console.error("resetPasswordForUser error:", error);
+    res.status(500).json({ success: false, error: error.message || "Failed" });
+  }
+};
