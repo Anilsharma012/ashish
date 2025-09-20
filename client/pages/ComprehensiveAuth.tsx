@@ -48,6 +48,9 @@ const ComprehensiveAuth = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
 
+  const phoneAuthServiceRef = useRef<any>(null);
+  const { toast } = useToast();
+
   useEffect(() => {
     if (isAuthenticated && user) {
       const routes: any = {
