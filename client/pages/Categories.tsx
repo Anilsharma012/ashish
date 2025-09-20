@@ -278,33 +278,37 @@ export default function Categories() {
 
         {/* Categories List */}
         <div className="space-y-2">
-          {categories.map((category) => (
-            <button
-              key={category._id || category.slug}
-              onClick={() => handleCategoryClick(category)}
-              className="w-full bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-lg">{category.icon}</span>
+          {categories.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">No categories yet</div>
+          ) : (
+            categories.map((category) => (
+              <button
+                key={category._id || category.slug}
+                onClick={() => handleCategoryClick(category)}
+                className="w-full bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <span className="text-lg">{category.icon}</span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-medium text-gray-900 text-base">
+                      {category.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {category.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900 text-base">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {category.description}
-                  </p>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                    {(category.subcategories?.length ?? 0)} types
+                  </span>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                  {(category.subcategories?.length ?? 0)} types
-                </span>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </div>
-            </button>
-          ))}
+              </button>
+            ))
+          )}
         </div>
       </div>
 
