@@ -121,6 +121,14 @@ const ComprehensiveAuth = () => {
           throw new Error("Password must be at least 6 characters");
         if (!["seller", "buyer", "agent", "admin"].includes(formData.userType))
           throw new Error("Select a valid user type");
+      } else {
+        // For login, ensure required fields exist
+        if (!formData.password || formData.password.length < 1) {
+          throw new Error("Please enter your password");
+        }
+        if (!formData.email && !formData.phone) {
+          throw new Error("Please enter your email or phone number to login");
+        }
       }
 
       const endpoint = isLogin ? "auth/login" : "auth/register";
