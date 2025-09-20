@@ -604,8 +604,18 @@ export function createServer() {
 
   // Initialize MongoDB connection
   connectToDatabase()
-    .then(() => {
+    .then(async () => {
       console.log("✅ MongoDB Atlas connected successfully");
+      try {
+        // Attempt to seed default data if collections are empty (idempotent)
+        const initModule = await import("./routes/init");
+        if (initModule && typeof initModule.seedDefaultData === "function") {
+          const seedResult = await initModule.seedDefaultData();
+          console.log("🔧 seedDefaultData result:", seedResult);
+        }
+      } catch (e: any) {
+        console.warn("⚠️ seedDefaultData failed:", e?.message || e);
+      }
     })
     .catch((error) => {
       console.error("�� MongoDB connection failed:", error);
