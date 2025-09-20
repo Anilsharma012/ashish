@@ -280,7 +280,10 @@ export const apiRequest = async (
       !API_CONFIG.baseUrl;
 
     if (isBuilderPreviewNoApi) {
-      console.warn("⚠️ apiRequest failed in Builder preview without API_BASE. Returning graceful failure.", error?.message || error);
+      console.warn(
+        "⚠️ apiRequest failed in Builder preview without API_BASE. Returning graceful failure.",
+        error?.message || error,
+      );
       return { data: {}, status: 0, ok: false } as any;
     }
 

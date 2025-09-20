@@ -546,7 +546,9 @@ export function createServer() {
 
   // Allow configuring additional origins via env and provide an escape hatch for staging/demo deployments
   const envAllowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+    ? process.env.ALLOWED_ORIGINS.split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
     : [];
   const allowAllOrigins = process.env.CORS_ALLOW_ALL === "true";
 
@@ -558,7 +560,10 @@ export function createServer() {
 
         // If allow-all is enabled (useful for staging/demo), allow and log a warning
         if (allowAllOrigins) {
-          console.warn("⚠️ CORS_ALLOW_ALL=true - allowing request from:", origin);
+          console.warn(
+            "⚠️ CORS_ALLOW_ALL=true - allowing request from:",
+            origin,
+          );
           return callback(null, true);
         }
 

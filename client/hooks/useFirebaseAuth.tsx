@@ -139,7 +139,9 @@ export const FirebaseAuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("token", idToken);
             localStorage.setItem("user", JSON.stringify(userData));
           } else {
-            console.log("No user profile found (new user or offline without cache)");
+            console.log(
+              "No user profile found (new user or offline without cache)",
+            );
           }
         } catch (error) {
           console.error("Error handling Firebase auth state:", error);
@@ -176,7 +178,9 @@ export const FirebaseAuthProvider = ({ children }: { children: ReactNode }) => {
       const idToken = await firebaseUser.getIdToken();
 
       if (!navigator.onLine) {
-        throw new Error("You're offline. Please connect to the internet to sign in.");
+        throw new Error(
+          "You're offline. Please connect to the internet to sign in.",
+        );
       }
 
       // Check if user exists in Firestore
@@ -248,7 +252,9 @@ export const FirebaseAuthProvider = ({ children }: { children: ReactNode }) => {
         // Update local state only; sync later when online via next login
         setUser(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
-        console.warn("Offline: queued local profile update; will sync when online.");
+        console.warn(
+          "Offline: queued local profile update; will sync when online.",
+        );
         return;
       }
 
