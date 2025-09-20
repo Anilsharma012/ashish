@@ -33,6 +33,8 @@ import {
   Shield,
 } from "lucide-react";
 import UnifiedLoginNotice from "../components/UnifiedLoginNotice";
+import { PhoneAuthService } from "../lib/firebase";
+import { useToast } from "../hooks/use-toast";
 
 const ComprehensiveAuth = () => {
   const navigate = useNavigate();
