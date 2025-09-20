@@ -12,6 +12,7 @@ import StaticFooter from "../components/StaticFooter";
 import HeroImageSlider from "../components/HeroImageSlider";
 import PropertyAdsSlider from "../components/PropertyAdsSlider";
 import AdSlot from "../components/AdSlot";
+const AIChatLauncher = React.lazy(() => import("../components/AIChatLauncher"));
 
 export default function Index() {
   return (
@@ -53,6 +54,10 @@ export default function Index() {
       {/* <PWAInstallButton /> */}{" "}
       {/* Removed red Install App button as requested */}
       <StaticFooter />
+      {/* AI Chat Launcher (homepage only) */}
+      <React.Suspense fallback={null}>
+        <AIChatLauncher />
+      </React.Suspense>
     </div>
   );
 }

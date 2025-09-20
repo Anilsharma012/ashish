@@ -251,63 +251,55 @@ export class PhoneAuthService {
 
 // Google Auth helpers
 // Google Auth helpers
-export const signInWithGoogle = async (): Promise<{
-  idToken: string;
-  profile: {
-    uid: string;
-    email: string | null;
-    name: string | null;
-    photoURL: string | null;
-  };
-}> => {
+export const signInWithGoogle = async (): Promise<FirebaseUser> => {
   try {
     if (!auth) throw new Error("Firebase not configured");
 
-    // First, handle redirect result if present (for environments where popups are blocked)
+    // First, handle redirect result (for environments where popups are blocked)
     try {
       const redirectRes = await getRedirectResult(auth);
       if (redirectRes && redirectRes.user) {
-        const u = redirectRes.user;
-        const idToken = await u.getIdToken(true);
-        return {
-          idToken,
-          profile: {
-            uid: u.uid,
-            email: u.email,
-            name: u.displayName,
-            photoURL: u.photoURL,
-          },
-        };
+        return redirectRes.user;
       }
-    } catch {}
+    } catch (e) {
+      // ignore redirect errors - we'll fallback to popup
+    }
 
     // Try popup normally
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-
-    const idToken = await user.getIdToken(true);
-
-    return {
-      idToken,
-      profile: {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName,
-        photoURL: user.photoURL,
-      },
-    };
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      return result.user;
+    } catch (popupError: any) {
+      // If popup fails due to being blocked, fallback to redirect
+      const code = popupError?.code || "";
+      if (
+        code === "auth/popup-blocked" ||
+        code === "auth/popup-closed-by-user"
+      ) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+          // After redirect, the app will reload and getRedirectResult will resolve
+          // Throw an informative error so caller can show a message if needed
+          throw new Error("Redirecting to Google sign-in (popup blocked)");
+        } catch (redirectErr) {
+          // If redirect also fails, fall through to standard error handling
+          console.error("Google redirect failed:", redirectErr);
+          throw redirectErr;
+        }
+      }
+      throw popupError;
+    }
   } catch (error) {
     console.error("Google authentication failed:", error);
     const authError = error as AuthError;
 
     let message = "Google authentication failed";
-    switch (authError.code) {
+    switch (authError?.code) {
       case "auth/popup-closed-by-user":
         message = "Authentication cancelled by user";
         break;
       case "auth/popup-blocked":
-        message =
-          "Popup blocked by browser. Please allow popups and try again.";
+        message = "Popup blocked by browser. Redirecting to Google sign-in...";
         break;
       case "auth/cancelled-popup-request":
         message = "Authentication cancelled";
@@ -323,7 +315,10 @@ export const signInWithGoogle = async (): Promise<{
           "Network error. Add this preview domain to Firebase > Authentication > Settings > Authorized domains, then retry.";
         break;
       default:
-        message = authError.message || "Google authentication failed";
+        message =
+          (error && (error as any).message) ||
+          authError?.message ||
+          "Google authentication failed";
     }
 
     throw new Error(message);

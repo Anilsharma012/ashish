@@ -77,59 +77,69 @@ function OLXStyleCategories() {
   }, []);
 
   const fetchData = async () => {
-    // Set default/empty data immediately to prevent UI blocking
-    setSliders([]); // No sliders needed since we removed Rohtak section
-
-    // Use default categories immediately to prevent empty UI
-    console.log("📂 Loading default categories first...");
+    setSliders([]);
     setCategories(defaultCategories as any);
 
     try {
-      // Try simple fetch with timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       try {
-        console.log("🔄 Fetching categories with timeout via global API...");
-        const apiRes = await (window as any).api("/categories?active=true");
+        const res = await fetch(
+          `/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`,
+          {
+            signal: controller.signal,
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
+          },
+        );
         clearTimeout(timeoutId);
 
+        const data = await res.json().catch(() => ({ success: false }));
         if (
-          apiRes &&
-          apiRes.ok &&
-          apiRes.json?.success &&
-          Array.isArray(apiRes.json.data) &&
-          apiRes.json.data.length > 0
+          res.ok &&
+          data?.success &&
+          Array.isArray(data.data) &&
+          data.data.length > 0
         ) {
-          console.log(
-            "✅ Categories loaded successfully, replacing defaults:",
-            apiRes.json.data.length,
-          );
-          setCategories(apiRes.json.data.slice(0, 10));
-          return; // Success
-        }
+          const mapped: Category[] = data.data.map((c: any) => ({
+            _id: c._id,
+            name: c.name,
+            slug: c.slug,
+            icon: c.iconUrl || c.icon || "",
+            description: c.description || "",
+            subcategories: Array.isArray(c.subcategories)
+              ? c.subcategories.map((s: any) => ({
+                  _id: s._id,
+                  name: s.name,
+                  slug: s.slug,
+                  categoryId: s.categoryId || c._id,
+                  active: s.isActive ?? s.active ?? true,
+                  order: s.sortOrder ?? s.order ?? 0,
+                }))
+              : [],
+            order: c.sortOrder ?? c.order ?? 0,
+            active: c.isActive ?? c.active ?? true,
+          }));
 
-        console.log("⚠️ Categories API not OK or empty; keeping defaults");
+          // Sort categories by order then name
+          const sorted = mapped.sort(
+            (a, b) => a.order - b.order || a.name.localeCompare(b.name),
+          );
+          setCategories(sorted.slice(0, 10));
+          return;
+        }
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
-
-        if (
-          fetchError?.name === "TimeoutError" ||
-          fetchError?.name === "AbortError"
-        ) {
-          console.warn(
-            "⏰ Categories request timeout - keeping default categories",
-          );
-        } else {
-          console.warn(
-            "⚠️ Categories request failed:",
-            fetchError?.message || fetchError,
-            "- keeping defaults",
-          );
-        }
+        console.warn(
+          "⚠️ Categories request failed:",
+          fetchError?.message || fetchError,
+        );
       }
     } catch (error) {
-      console.error("❌ Unexpected error:", error.message || error);
+      console.error("❌ Unexpected error:", (error as any).message || error);
     } finally {
       setLoading(false);
     }
@@ -146,15 +156,19 @@ function OLXStyleCategories() {
         return;
       }
 
-      // Property categories -> dedicated pages that fetch admin subcategories
+      // Property categories -> dedicated pages
       const propertyPages = new Set(["buy", "sale", "rent", "lease", "pg"]);
       if (propertyPages.has(slug)) {
         navigate(`/${slug}`);
         return;
       }
 
-      // Fallback: generic category page
-      navigate(`/categories/${slug || name.replace(/[^a-z0-9]+/g, "-")}`);
+      // For regular categories: show subcategories panel using data we already fetched
+      setActiveCat(category);
+      const subs = Array.isArray((category as any).subcategories)
+        ? (category as any).subcategories
+        : [];
+      setActiveSubcats(subs);
     } catch (e) {
       console.warn("Category navigation failed:", (e as any)?.message || e);
     }

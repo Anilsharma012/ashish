@@ -257,7 +257,16 @@ export const registerUser: RequestHandler = async (req, res) => {
 export const loginUser: RequestHandler = async (req, res) => {
   try {
     const db = getDatabase();
+    console.log("/api/auth/login request body:", req.body);
     const { email, phone, password, userType } = req.body;
+
+    // Basic validation
+    if (!password) {
+      console.warn("Login attempt missing password");
+      return res
+        .status(400)
+        .json({ success: false, error: "Password is required" });
+    }
 
     // Build query based on provided fields
     let query: any = {};
@@ -275,6 +284,7 @@ export const loginUser: RequestHandler = async (req, res) => {
     } else if (phone) {
       query = { phone };
     } else {
+      console.warn("Login attempt missing identifier (email/phone/username)");
       return res.status(400).json({
         success: false,
         error: "Email, phone number, or username is required",
@@ -282,12 +292,12 @@ export const loginUser: RequestHandler = async (req, res) => {
     }
 
     // Support unified login - don't filter by userType for login
-    // Users can login with any userType using the same credentialsialsng the same credentials
 
     // Find user by email, phone, or username
     const user = await db.collection("users").findOne(query);
 
     if (!user) {
+      console.warn("Login failed - user not found for query:", query);
       return res.status(401).json({
         success: false,
         error: "Invalid credentials",
@@ -297,6 +307,7 @@ export const loginUser: RequestHandler = async (req, res) => {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      console.warn("Login failed - invalid password for user:", user._id);
       return res.status(401).json({
         success: false,
         error: "Invalid credentials",
@@ -807,3 +818,47 @@ function toE164(phone: string) {
   if (digits.startsWith("91") && digits.length === 12) return `+${digits}`;
   return phone.startsWith("+") ? phone : `+${digits}`;
 }
+
+// DEV helper: Reset password for a user by email or phone (only in non-production)
+export const resetPasswordForUser: RequestHandler = async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      return res
+        .status(403)
+        .json({ success: false, error: "Not allowed in production" });
+    }
+
+    const db = getDatabase();
+    const { email, phone, newPassword } = req.body;
+    if (!newPassword || (!email && !phone)) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "email or phone and newPassword required",
+        });
+    }
+
+    const query: any = {};
+    if (email) query.email = email;
+    if (phone) query.phone = phone;
+
+    const user = await db.collection("users").findOne(query);
+    if (!user)
+      return res.status(404).json({ success: false, error: "User not found" });
+
+    const hashed = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await db
+      .collection("users")
+      .updateOne(
+        { _id: user._id },
+        { $set: { password: hashed, updatedAt: new Date() } },
+      );
+
+    console.log(`Password for user ${user._id} reset via debug endpoint`);
+    res.json({ success: true, message: "Password reset" });
+  } catch (error: any) {
+    console.error("resetPasswordForUser error:", error);
+    res.status(500).json({ success: false, error: error.message || "Failed" });
+  }
+};

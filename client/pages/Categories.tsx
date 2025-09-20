@@ -43,19 +43,26 @@ export default function Categories() {
     fetchPropertyCounts();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (options: { cacheBust?: boolean } = {}) => {
     try {
       setLoading(true);
-      const response = await fetch("/api/categories", {
+      const cacheBuster = options.cacheBust ? `&_=${Date.now()}` : "";
+      const url = `/api/categories?published=true&limit=200${cacheBuster}`;
+      const response = await fetch(url, {
         headers: {
           "Cache-Control": "no-cache",
           Pragma: "no-cache",
         },
       });
-      const data = await response.json();
+      const data = await response
+        .json()
+        .catch(() => ({ success: false, data: [] }));
 
       if (data.success) {
-        setCategories(data.data);
+        setCategories(data.data || []);
+        try {
+          window.dispatchEvent(new CustomEvent("categories:updated"));
+        } catch {}
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -259,39 +266,53 @@ export default function Categories() {
 
       <div className="px-4 py-6">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-xl font-medium text-gray-900">All Categories</h1>
+          <div>
+            <button
+              onClick={() => fetchCategories({ cacheBust: true })}
+              className="text-sm text-[#C70000] font-medium hover:underline"
+            >
+              Refresh categories
+            </button>
+          </div>
         </div>
 
         {/* Categories List */}
         <div className="space-y-2">
-          {categories.map((category) => (
-            <button
-              key={category._id || category.slug}
-              onClick={() => handleCategoryClick(category)}
-              className="w-full bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-lg">{category.icon}</span>
+          {categories.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              No categories yet
+            </div>
+          ) : (
+            categories.map((category) => (
+              <button
+                key={category._id || category.slug}
+                onClick={() => handleCategoryClick(category)}
+                className="w-full bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <span className="text-lg">{category.icon}</span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-medium text-gray-900 text-base">
+                      {category.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {category.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900 text-base">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {category.description}
-                  </p>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                    {category.subcategories?.length ?? 0} types
+                  </span>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                  {(category.subcategories?.length ?? 0)} types
-                </span>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </div>
-            </button>
-          ))}
+              </button>
+            ))
+          )}
         </div>
       </div>
 

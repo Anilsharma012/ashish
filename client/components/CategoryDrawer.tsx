@@ -59,8 +59,10 @@ const CategoryDrawer: React.FC<CategoryDrawerProps> = ({ isOpen, onClose }) => {
 
       const allCategories: Category[] = [];
 
-      // Fetch property categories with subcategories (new API)
-      const propRes = await fetch("/api/categories?active=true&withSub=true");
+      // Fetch property categories with subcategories (public API)
+      const propRes = await fetch(
+        `/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`,
+      );
       if (propRes.ok) {
         const propJson = await propRes.json();
         if (propJson.success && Array.isArray(propJson.data)) {
@@ -333,7 +335,6 @@ const CategoryDrawer: React.FC<CategoryDrawerProps> = ({ isOpen, onClose }) => {
                         category.subcategories.length > 0 && (
                           <div className="ml-8 space-y-1 pb-2">
                             {category.subcategories
-                              .filter((sub) => sub.active)
                               .sort(
                                 (a, b) =>
                                   a.order - b.order ||

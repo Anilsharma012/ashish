@@ -41,14 +41,14 @@ export default function CategoriesGrid() {
   useEffect(() => {
     const handler = () => fetchCategories();
     fetchCategories();
-    window.addEventListener('categories:updated', handler);
-    return () => window.removeEventListener('categories:updated', handler);
+    window.addEventListener("categories:updated", handler);
+    return () => window.removeEventListener("categories:updated", handler);
   }, []);
 
   const fetchCategories = async () => {
     try {
-      // Prefer public endpoint with active=true
-      let response = await fetch("/api/categories?active=true");
+      // Prefer public endpoint with published=true (public API)
+      let response = await fetch("/api/categories?published=true&limit=200");
       let data: any;
       try {
         data = await response.json();
@@ -59,17 +59,20 @@ export default function CategoriesGrid() {
       if (!response.ok || !data?.success) {
         // Fallback to admin endpoint and filter active
         const adminRes = await fetch("/api/admin/categories");
-        const adminData = await adminRes.json().catch(() => ({ success: false, data: [] }));
+        const adminData = await adminRes
+          .json()
+          .catch(() => ({ success: false, data: [] }));
         if (adminData?.success) {
-          const mapped = (adminData.data || [])
-            .filter((c: any) => c.isActive === true || c.active === true)
-            .map((c: any) => ({
-              ...c,
-              order: c.sortOrder ?? c.order ?? 0,
-              icon: c.icon || c.iconUrl || "",
-              active: c.isActive ?? c.active ?? true,
-            }));
-          const sorted = mapped.sort((a: any, b: any) => (a.order - b.order) || a.name.localeCompare(b.name));
+          const mapped = (adminData.data || []).map((c: any) => ({
+            ...c,
+            order: c.sortOrder ?? c.order ?? 0,
+            icon: c.icon || c.iconUrl || "",
+            active: c.isActive ?? c.active ?? true,
+          }));
+          const sorted = mapped.sort(
+            (a: any, b: any) =>
+              a.order - b.order || a.name.localeCompare(b.name),
+          );
           setCategories(sorted.slice(0, 10));
           return;
         }
@@ -82,7 +85,9 @@ export default function CategoriesGrid() {
           icon: c.icon || c.iconUrl || "",
           active: c.isActive ?? c.active ?? true,
         }));
-        const sorted = mapped.sort((a: any, b: any) => (a.order - b.order) || a.name.localeCompare(b.name));
+        const sorted = mapped.sort(
+          (a: any, b: any) => a.order - b.order || a.name.localeCompare(b.name),
+        );
         setCategories(sorted.slice(0, 10));
       }
     } catch (error) {
