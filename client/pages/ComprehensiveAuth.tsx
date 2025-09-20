@@ -200,35 +200,33 @@ const ComprehensiveAuth = () => {
       return;
     }
 
+    if (!isFirebaseConfigured) {
+      setError("Phone authentication is unavailable: Firebase is not configured.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
     try {
-      const { data } = await api.post("auth/send-otp", {
-        phone: formData.phone,
-      });
-
-      if (data.success) {
-        setOtpSent(true);
-        setOtpTimer(60);
-        setSuccess("OTP sent successfully! Use 123456 for demo");
-      } else {
-        setError(data.error || "Failed to send OTP");
+      // Initialize PhoneAuthService if needed
+      if (!phoneAuthServiceRef.current) {
+        phoneAuthServiceRef.current = new PhoneAuthService();
       }
-    } catch (error: any) {
-      console.error("OTP send error:", error);
 
-      if (
-        error.message.includes("Failed to fetch") ||
-        error.message.includes("Network")
-      ) {
-        setError("Network error. Please check your connection and try again.");
-      } else {
-        // Fallback for demo
-        setOtpSent(true);
-        setOtpTimer(60);
-        setSuccess("OTP sent successfully! Use 123456 for demo");
-      }
+      // Initialize invisible reCAPTCHA and send OTP
+      await phoneAuthServiceRef.current.initializeRecaptcha("recaptcha-container", "invisible");
+      await phoneAuthServiceRef.current.sendOTP(formData.phone);
+
+      setOtpSent(true);
+      setOtpTimer(60);
+      setSuccess("OTP sent successfully. Enter the 6-digit code you received.");
+      toast({ title: "OTP sent", description: `OTP sent to ${formData.phone}` });
+    } catch (err: any) {
+      console.error("sendOTP error:", err);
+      const msg = err?.message || "Failed to send OTP";
+      setError(msg);
+      toast({ title: "OTP error", description: msg });
     } finally {
       setLoading(false);
     }
@@ -241,35 +239,22 @@ const ComprehensiveAuth = () => {
     setError("");
 
     try {
-      const { data } = await api.post("auth/verify-otp", {
-        phone: formData.phone,
-        otp: formData.otp,
-      });
+      if (!phoneAuthServiceRef.current) {
+        throw new Error("No OTP flow initialized. Please request OTP first.");
+      }
 
-      if (data.success) {
-        const { token, user } = data.data;
-        login(token, user);
-        redirectToCorrectDashboard(user.userType);
-      } else {
-        setError(data.error || "Invalid OTP");
-      }
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
-      // Fallback for demo
-      if (formData.otp === "123456" || formData.otp.length === 6) {
-        const mockUser = {
-          id: "otp-" + Date.now(),
-          name: formData.phone,
-          email: "",
-          phone: formData.phone,
-          userType: "seller",
-        };
-        const mockToken = "otp-token-" + Date.now();
-        login(mockToken, mockUser);
-        redirectToCorrectDashboard("seller");
-      } else {
-        setError("Invalid OTP. Use 123456 for demo");
-      }
+      const firebaseUser = await phoneAuthServiceRef.current.verifyOTP(formData.otp);
+
+      // Login/create user in Firestore and redirect
+      await loginWithFirebase(firebaseUser, formData.userType);
+      setSuccess("Logged in successfully");
+      toast({ title: "Signed in", description: "Phone sign-in successful" });
+      redirectToCorrectDashboard(formData.userType);
+    } catch (err: any) {
+      console.error("OTP verification error:", err);
+      const msg = err?.message || "OTP verification failed";
+      setError(msg);
+      toast({ title: "OTP error", description: msg });
     } finally {
       setLoading(false);
     }
@@ -293,25 +278,20 @@ const ComprehensiveAuth = () => {
         return;
       }
 
-      // 1) Chrome account chooser popup -> Firebase ID token
-      const { idToken } = await signInWithGoogle();
+      // Sign in with Google (popup or redirect fallback)
+      const firebaseUser = await signInWithGoogle();
 
-      // 2) Send idToken to backend for verification
-      const { data } = await api.post("auth/google", {
-        idToken,
-        userType: formData.userType || "buyer",
-      });
+      // Create/update user in Firestore and login
+      await loginWithFirebase(firebaseUser, formData.userType);
 
-      if (!data?.success) {
-        throw new Error(data?.error || "Google authentication failed");
-      }
-
-      // 3) JWT + user context -> redirect
-      const { token, user } = data.data;
-      login(token, user);
-      redirectToCorrectDashboard(user.userType);
+      setSuccess("Signed in successfully");
+      toast({ title: "Signed in", description: "Google sign-in successful" });
+      redirectToCorrectDashboard(formData.userType);
     } catch (err: any) {
-      setError(err.message || "Google authentication failed");
+      console.error("Google sign-in error:", err);
+      const msg = err?.message || "Google authentication failed";
+      setError(msg);
+      toast({ title: "Google sign-in error", description: msg });
     } finally {
       setLoading(false);
     }
@@ -571,12 +551,15 @@ const ComprehensiveAuth = () => {
                             name="phone"
                             value={formData.phone}
                             onChange={handleInputChange}
-                            placeholder="Enter your phone number"
+                            placeholder="Enter your phone number (10 digits)"
                             className="pl-10"
                             required
                           />
                         </div>
                       </div>
+
+                      {/* reCAPTCHA container (invisible) */}
+                      <div id="recaptcha-container" />
 
                       <Button
                         onClick={handleSendOTP}
