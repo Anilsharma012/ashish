@@ -194,25 +194,39 @@ export function useWatermark() {
       const overlay = document.createElement("div");
       overlay.setAttribute("data-wm-overlay", "1");
       overlay.setAttribute("aria-hidden", "true");
+      // Make overlay cover the entire host and tile the watermark text across it
       overlay.style.position = "absolute";
-      overlay.style.right = "0";
-      overlay.style.bottom = "0";
-      overlay.style.left = "auto";
-      overlay.style.top = "auto";
+      overlay.style.inset = "0";
       overlay.style.pointerEvents = "none";
-      overlay.style.zIndex = "3";
+      overlay.style.zIndex = "60";
+      overlay.style.display = "flex";
+      overlay.style.flexWrap = "wrap";
+      overlay.style.alignItems = "center";
+      overlay.style.justifyContent = "center";
+      overlay.style.gap = "2rem";
+      overlay.style.opacity = "0.18";
 
-      const text = document.createElement("div");
-      text.textContent = TEXT;
-      const fontPx = Math.max(18, Math.round(Math.min(dispW, dispH) * 0.16));
-      text.style.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
-      text.style.textTransform = "uppercase";
-      text.style.color = "rgba(255,255,255,0.72)";
-      text.style.textShadow = "0 1px 2px rgba(0,0,0,0.35)";
-      text.style.letterSpacing = `${Math.round(fontPx * 0.06)}px`;
-      text.style.margin = `${Math.max(12, Math.round(Math.min(dispW, dispH) * 0.035))}px`;
+      // Create multiple watermark nodes tiled across the area
+      const tileCountX = Math.max(3, Math.round(dispW / 160));
+      const tileCountY = Math.max(2, Math.round(dispH / 120));
+      const fontPx = Math.max(12, Math.round(Math.min(dispW, dispH) * 0.06));
 
-      overlay.appendChild(text);
+      for (let y = 0; y < tileCountY; y++) {
+        for (let x = 0; x < tileCountX; x++) {
+          const text = document.createElement("div");
+          text.textContent = TEXT;
+          text.style.font = `${FONT_WEIGHT} ${fontPx}px Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif`;
+          text.style.textTransform = "lowercase";
+          text.style.color = "rgba(0,0,0,0.24)";
+          text.style.transform = "rotate(-25deg)";
+          text.style.userSelect = "none";
+          text.style.pointerEvents = "none";
+          text.style.whiteSpace = "nowrap";
+          text.style.letterSpacing = "1px";
+          overlay.appendChild(text);
+        }
+      }
+
       host.appendChild(overlay);
     };
 
