@@ -141,9 +141,20 @@ const ComprehensiveAuth = () => {
 
       console.log(`Making ${isLogin ? "login" : "registration"} request...`);
 
-      const { data } = await api.post(endpoint, payload);
+      let data: any = null;
+      try {
+        const resp = await api.post(endpoint, payload);
+        data = resp.data;
+      } catch (apiErr: any) {
+        console.warn("API post error:", apiErr);
+        // api.post throws for non-2xx responses; show server message if available
+        const serverMsg = apiErr?.message || apiErr?.data?.error || apiErr?.data?.message;
+        setError(serverMsg || (isLogin ? "Invalid credentials" : "Registration failed"));
+        setLoading(false);
+        return;
+      }
 
-      if (data.success) {
+      if (data && data.success) {
         const { token, user } = data.data;
 
         if (!isLogin) {
@@ -160,8 +171,7 @@ const ComprehensiveAuth = () => {
         }
       } else {
         const errorMessage =
-          data.error ||
-          data.message ||
+          (data && (data.error || data.message)) ||
           (isLogin ? "Invalid credentials" : "Registration failed");
         setError(errorMessage);
       }
