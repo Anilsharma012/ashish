@@ -3,249 +3,114 @@ import { getDatabase } from "../db/mongodb";
 import { User, AdPackage, ApiResponse } from "@shared/types";
 import bcrypt from "bcrypt";
 
-// Initialize system with default data
-export const initializeSystem: RequestHandler = async (req, res) => {
+// Shared seeding logic for initializing default data
+export async function seedDefaultData() {
+  const db = getDatabase();
+  console.log("🚀 Seeding default system data...");
+
+  const resultSummary: any = {
+    adminCreated: false,
+    testUsersCreated: 0,
+    packagesCreated: 0,
+    categoriesCreated: 0,
+  };
+
+  // 1. Admin user
   try {
-    const db = getDatabase();
-
-    console.log("🚀 Starting system initialization...");
-
-    // 1. Initialize admin user if not exists
     const existingAdmin = await db.collection("users").findOne({ userType: "admin" });
-    
     if (!existingAdmin) {
       console.log("📝 Creating default admin user...");
       const hashedPassword = await bcrypt.hash("admin123", 10);
-      
       const adminUser = {
         name: "Administrator",
         email: "admin@aashishproperty.com",
         phone: "+91 9876543210",
         password: hashedPassword,
         userType: "admin",
-        preferences: {
-          propertyTypes: [],
-          priceRange: { min: 0, max: 10000000 },
-          locations: [],
-        },
+        status: "active",
+        isVerified: true,
+        preferences: { propertyTypes: [], priceRange: { min: 0, max: 10000000 }, locations: [] },
         favorites: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-
-      await db.collection("users").insertOne(adminUser);
-      console.log("✅ Admin user created");
+      const r = await db.collection("users").insertOne(adminUser);
+      resultSummary.adminCreated = true;
+      console.log("✅ Admin user created", r.insertedId);
+    } else {
+      console.log("✅ Admin already exists");
     }
+  } catch (e: any) {
+    console.error("Admin seeding error:", e?.message || e);
+  }
 
-    // 2. Initialize test users if not exist
+  // 2. Test users
+  try {
     const testUsers = [
-      {
-        name: "Test Seller",
-        email: "seller@test.com",
-        phone: "+91 9876543211",
-        password: "password123",
-        userType: "seller"
-      },
-      {
-        name: "Test Buyer",
-        email: "buyer@test.com", 
-        phone: "+91 9876543212",
-        password: "password123",
-        userType: "buyer"
-      },
-      {
-        name: "Test Agent",
-        email: "agent@test.com",
-        phone: "+91 9876543213", 
-        password: "password123",
-        userType: "agent"
-      }
+      { name: "Test Seller", email: "seller@test.com", phone: "+91 9876543211", password: "password123", userType: "seller" },
+      { name: "Test Buyer", email: "buyer@test.com", phone: "+91 9876543212", password: "password123", userType: "buyer" },
+      { name: "Test Agent", email: "agent@test.com", phone: "+91 9876543213", password: "password123", userType: "agent" },
     ];
 
-    for (const userData of testUsers) {
-      const existingUser = await db.collection("users").findOne({ email: userData.email });
-      
-      if (!existingUser) {
-        console.log(`📝 Creating test user: ${userData.email}`);
-        const hashedPassword = await bcrypt.hash(userData.password, 10);
-        
-        const user: Omit<User, "_id"> = {
-          ...userData,
-          password: hashedPassword,
-          preferences: {
-            propertyTypes: [],
-            priceRange: { min: 0, max: 10000000 },
-            locations: [],
-          },
-          favorites: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-
-        // Add agent profile if needed
-        if (userData.userType === "agent") {
-          (user as any).agentProfile = {
-            experience: 5,
-            specializations: ["residential", "commercial"],
-            rating: 4.5,
-            reviewCount: 20,
-            aboutMe: "Experienced real estate agent in Rohtak",
-            serviceAreas: ["Model Town", "Sector 1", "Sector 2"],
-          };
-          (user as any).properties = [];
-        }
-
-        await db.collection("users").insertOne(user);
-        console.log(`✅ Test user created: ${userData.email}`);
+    for (const u of testUsers) {
+      const exists = await db.collection("users").findOne({ email: u.email });
+      if (!exists) {
+        const hashed = await bcrypt.hash(u.password, 10);
+        await db.collection("users").insertOne({ ...u, password: hashed, createdAt: new Date(), updatedAt: new Date() });
+        resultSummary.testUsersCreated++;
       }
     }
+    console.log(`✅ Test users created: ${resultSummary.testUsersCreated}`);
+  } catch (e: any) {
+    console.error("Test users seeding error:", e?.message || e);
+  }
 
-    // 3. Initialize advertisement packages
+  // 3. Ad packages
+  try {
     const existingPackages = await db.collection("ad_packages").countDocuments();
-    
     if (existingPackages === 0) {
-      console.log("📦 Creating default advertisement packages...");
-      
-      const defaultPackages: Omit<AdPackage, "_id">[] = [
-        {
-          name: "Basic Listing",
-          description: "Standard property listing with basic visibility",
-          price: 0,
-          duration: 30,
-          features: [
-            "30 days listing",
-            "Standard visibility",
-            "Basic property details",
-            "Contact information display",
-          ],
-          type: "basic",
-          category: "property",
-          location: "rohtak",
-          active: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          name: "Featured Listing",
-          description: "Enhanced visibility with featured badge",
-          price: 299,
-          duration: 30,
-          features: [
-            "30 days listing",
-            "Featured badge",
-            "Top of search results",
-            "Homepage visibility",
-            "Priority in category",
-            "Enhanced property details",
-            "Contact information display",
-          ],
-          type: "featured",
-          category: "property",
-          location: "rohtak",
-          active: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          name: "Premium Listing",
-          description: "Maximum visibility with premium features",
-          price: 599,
-          duration: 30,
-          features: [
-            "30 days listing",
-            "Premium badge",
-            "Top priority in all searches",
-            "Homepage banner slot",
-            "Featured in category top",
-            "Enhanced property details",
-            "Multiple image gallery",
-            "Contact information display",
-            "Analytics dashboard",
-            "Priority customer support",
-          ],
-          type: "premium",
-          category: "property",
-          location: "rohtak",
-          active: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      const defaultPackages = [
+        { name: "Basic Listing", description: "Standard property listing with basic visibility", price: 0, duration: 30, features: ["30 days listing"], type: "basic", category: "property", location: "rohtak", active: true, createdAt: new Date(), updatedAt: new Date() },
+        { name: "Featured Listing", description: "Enhanced visibility with featured badge", price: 299, duration: 30, features: ["Featured badge"], type: "featured", category: "property", location: "rohtak", active: true, createdAt: new Date(), updatedAt: new Date() },
+        { name: "Premium Listing", description: "Maximum visibility with premium features", price: 599, duration: 30, features: ["Premium badge"], type: "premium", category: "property", location: "rohtak", active: true, createdAt: new Date(), updatedAt: new Date() },
       ];
-
-      await db.collection("ad_packages").insertMany(defaultPackages);
-      console.log("✅ Advertisement packages created");
+      const r = await db.collection("ad_packages").insertMany(defaultPackages);
+      resultSummary.packagesCreated = r.insertedCount || defaultPackages.length;
+      console.log("✅ Ad packages seeded");
     }
+  } catch (e: any) {
+    console.error("Ad packages seeding error:", e?.message || e);
+  }
 
-    // 4. Initialize categories if not exist
+  // 4. Categories
+  try {
     const existingCategories = await db.collection("categories").countDocuments();
-    
     if (existingCategories === 0) {
-      console.log("🏷️ Creating default categories...");
-      
       const defaultCategories = [
-        {
-          name: "Residential",
-          slug: "residential",
-          icon: "🏠",
-          description: "Residential properties for living",
-          subcategories: [
-            { id: "1bhk", name: "1 BHK", slug: "1bhk", description: "1 Bedroom Hall Kitchen" },
-            { id: "2bhk", name: "2 BHK", slug: "2bhk", description: "2 Bedroom Hall Kitchen" },
-            { id: "3bhk", name: "3 BHK", slug: "3bhk", description: "3 Bedroom Hall Kitchen" },
-            { id: "villa", name: "Villa", slug: "villa", description: "Independent villa" },
-            { id: "plot", name: "Plot", slug: "plot", description: "Residential plot" },
-          ],
-          order: 1,
-          active: true,
-        },
-        {
-          name: "Commercial",
-          slug: "commercial",
-          icon: "🏢",
-          description: "Commercial properties for business",
-          subcategories: [
-            { id: "shop", name: "Shop", slug: "shop", description: "Commercial shop" },
-            { id: "office", name: "Office", slug: "office", description: "Office space" },
-            { id: "warehouse", name: "Warehouse", slug: "warehouse", description: "Storage warehouse" },
-            { id: "showroom", name: "Showroom", slug: "showroom", description: "Display showroom" },
-          ],
-          order: 2,
-          active: true,
-        },
+        { name: "Residential", slug: "residential", icon: "🏠", description: "Residential properties", subcategories: [ { name: "1 BHK", slug: "1bhk", icon: "🏠" }, { name: "2 BHK", slug: "2bhk", icon: "🏠" } ], order: 1, active: true },
+        { name: "Commercial", slug: "commercial", icon: "🏢", description: "Commercial properties", subcategories: [ { name: "Office", slug: "office", icon: "🏢" }, { name: "Shop", slug: "shop", icon: "🏪" } ], order: 2, active: true },
       ];
-
-      await db.collection("categories").insertMany(defaultCategories);
-      console.log("✅ Categories created");
+      const r = await db.collection("categories").insertMany(defaultCategories);
+      resultSummary.categoriesCreated = r.insertedCount || defaultCategories.length;
+      console.log("✅ Categories seeded");
+    } else {
+      console.log("✅ Categories already present");
     }
+  } catch (e: any) {
+    console.error("Categories seeding error:", e?.message || e);
+  }
 
-    const response: ApiResponse<{
-      message: string;
-      initialized: {
-        admin: boolean;
-        testUsers: number;
-        packages: number;
-        categories: number;
-      };
-    }> = {
-      success: true,
-      data: {
-        message: "System initialized successfully",
-        initialized: {
-          admin: !existingAdmin,
-          testUsers: testUsers.length,
-          packages: existingPackages === 0 ? 3 : 0,
-          categories: existingCategories === 0 ? 2 : 0,
-        },
-      },
-    };
+  console.log("🎉 Seeding complete", resultSummary);
+  return resultSummary;
+}
 
-    console.log("🎉 System initialization completed!");
-    res.json(response);
-  } catch (error) {
+// Initialize system with default data
+export const initializeSystem: RequestHandler = async (req, res) => {
+  try {
+    const summary = await seedDefaultData();
+    res.json({ success: true, data: summary, message: "System initialized successfully" });
+  } catch (error: any) {
     console.error("❌ Error initializing system:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to initialize system",
-    });
+    res.status(500).json({ success: false, error: "Failed to initialize system" });
   }
 };
