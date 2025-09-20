@@ -124,17 +124,25 @@ const ComprehensiveAuth = () => {
       }
 
       const endpoint = isLogin ? "auth/login" : "auth/register";
+      // sanitize inputs
+      const sanitizedEmail = formData.email?.trim().toLowerCase() || undefined;
+      const sanitizedPhoneRaw = formData.phone ? String(formData.phone).replace(/[^0-9+]/g, "") : undefined;
+      // if phone starts with 0 or missing country code, strip leading zeros
+      const sanitizedPhone = sanitizedPhoneRaw
+        ? sanitizedPhoneRaw.replace(/^0+/, "").slice(-10)
+        : undefined;
+
       const payload = isLogin
         ? {
-            email: formData.email || undefined,
-            phone: formData.phone || undefined,
+            email: sanitizedEmail,
+            phone: sanitizedPhone,
             password: formData.password,
             userType: formData.userType === "admin" ? "admin" : undefined,
           }
         : {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
+            name: (formData.name || "").trim(),
+            email: sanitizedEmail,
+            phone: sanitizedPhone,
             password: formData.password,
             userType: formData.userType,
           };
