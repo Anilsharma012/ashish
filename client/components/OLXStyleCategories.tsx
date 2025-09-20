@@ -85,7 +85,7 @@ function OLXStyleCategories() {
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       try {
-        const res = await fetch("/api/categories?active=true&withSub=true", {
+        const res = await fetch(`/api/categories?published=true&withSub=true&limit=200&_=${Date.now()}`, {
           signal: controller.signal,
           headers: {
             "Cache-Control": "no-cache",
