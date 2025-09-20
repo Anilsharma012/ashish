@@ -272,6 +272,18 @@ export const apiRequest = async (
       return apiRequest(endpoint, options, retryCount + 1);
     }
 
+    // If we're running inside a Builder preview and no explicit API base URL is configured,
+    // don't throw uncaught errors that break the UI; return a graceful failure result
+    const isBuilderPreviewNoApi =
+      typeof window !== "undefined" &&
+      window.location.hostname.includes("projects.builder.codes") &&
+      !API_CONFIG.baseUrl;
+
+    if (isBuilderPreviewNoApi) {
+      console.warn("⚠️ apiRequest failed in Builder preview without API_BASE. Returning graceful failure.", error?.message || error);
+      return { data: {}, status: 0, ok: false } as any;
+    }
+
     if (error && error.name === "AbortError") {
       throw new Error(`Request timeout after ${finalTimeout}ms`);
     }
